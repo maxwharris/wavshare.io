@@ -1135,7 +1135,13 @@ const Profile: React.FC = () => {
                               showNotification(result.message, 'success');
                             } catch (error) {
                               console.error('Add playlist to queue error:', error);
-                              showNotification(error instanceof Error ? error.message : 'Failed to add playlist to queue', 'error');
+                              const errorMessage = error instanceof Error ? error.message : 'Failed to add playlist to queue';
+                              // Handle "already in queue" as a warning instead of error
+                              if (errorMessage.includes('already in your queue')) {
+                                showNotification(errorMessage, 'warning');
+                              } else {
+                                showNotification(errorMessage, 'error');
+                              }
                             }
                           }}
                           disabled={(playlist.tracks?.length || 0) === 0}
@@ -1150,7 +1156,13 @@ const Profile: React.FC = () => {
                               showNotification(result.message, 'success');
                             } catch (error) {
                               console.error('Add playlist to queue error:', error);
-                              showNotification(error instanceof Error ? error.message : 'Failed to add playlist to queue', 'error');
+                              const errorMessage = error instanceof Error ? error.message : 'Failed to add playlist to queue';
+                              // Handle "already in queue" as a warning instead of error
+                              if (errorMessage.includes('already in your queue')) {
+                                showNotification(errorMessage, 'warning');
+                              } else {
+                                showNotification(errorMessage, 'error');
+                              }
                             }
                           }}
                           disabled={(playlist.tracks?.length || 0) === 0}

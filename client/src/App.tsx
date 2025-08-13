@@ -42,8 +42,8 @@ const AppContent: React.FC = () => {
   return (
     <ToastProvider>
       <AudioProvider>
-        <QueueProvider>
-          <PlaylistProvider>
+        <PlaylistProvider>
+          <QueueProvider>
             <NotificationProvider>
               <Router>
                 <div className="App min-h-screen bg-slate-900">
@@ -67,8 +67,8 @@ const AppContent: React.FC = () => {
                 </div>
               </Router>
             </NotificationProvider>
-          </PlaylistProvider>
-        </QueueProvider>
+          </QueueProvider>
+        </PlaylistProvider>
       </AudioProvider>
     </ToastProvider>
   );

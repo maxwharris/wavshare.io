@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { queueService, QueueItem, QueueSettings } from '../services/queueService.ts';
 import { useAuth } from './AuthContext.tsx';
 import { useAudio } from './AudioContext.tsx';
+import { usePlaylist } from './PlaylistContext.tsx';
 import { API_CONFIG } from '../config/api';
 
 interface QueueContextType {
@@ -44,6 +45,7 @@ interface QueueProviderProps {
 export const QueueProvider: React.FC<QueueProviderProps> = ({ children }) => {
   const { user, loading: authLoading } = useAuth();
   const { setQueue: setAudioQueue, currentTrack, isPlaying } = useAudio();
+  const { setQueueRefreshCallback } = usePlaylist();
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [settings, setSettings] = useState<QueueSettings | null>(null);
   const [loading, setLoading] = useState(false);
@@ -227,6 +229,12 @@ export const QueueProvider: React.FC<QueueProviderProps> = ({ children }) => {
       loadQueue();
     }
   }, [user, authLoading, loadQueue]);
+
+  // Register loadQueue callback with PlaylistContext
+  useEffect(() => {
+    setQueueRefreshCallback(loadQueue);
+    return () => setQueueRefreshCallback(null);
+  }, [loadQueue, setQueueRefreshCallback]);
 
   // Sync queue with audio player
   useEffect(() => {

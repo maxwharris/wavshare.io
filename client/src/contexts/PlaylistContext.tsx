@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { useAuth } from './AuthContext.tsx';
 import { playlistService, Playlist } from '../services/playlistService.ts';
 
@@ -15,6 +15,7 @@ interface PlaylistContextType {
   addPlaylistToQueue: (playlistId: string, options?: { shuffle?: boolean; playNext?: boolean }) => Promise<{ message: string; addedCount: number; skippedCount: number }>;
   isTrackInPlaylist: (playlistId: string, postId: string) => boolean;
   getPlaylistsContainingTrack: (postId: string) => Playlist[];
+  setQueueRefreshCallback: (callback: (() => Promise<void>) | null) => void;
 }
 
 const PlaylistContext = createContext<PlaylistContextType | undefined>(undefined);
@@ -35,6 +36,7 @@ export const PlaylistProvider: React.FC<PlaylistProviderProps> = ({ children }) 
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const queueRefreshCallbackRef = useRef<(() => Promise<void>) | null>(null);
   const { user, token } = useAuth();
 
   const fetchPlaylists = useCallback(async () => {
@@ -182,6 +184,12 @@ export const PlaylistProvider: React.FC<PlaylistProviderProps> = ({ children }) 
 
     try {
       const response = await playlistService.addPlaylistToQueue(playlistId, options, token);
+      
+      // Refresh the queue after adding playlist
+      if (queueRefreshCallbackRef.current && typeof queueRefreshCallbackRef.current === 'function') {
+        await queueRefreshCallbackRef.current();
+      }
+      
       return response;
     } catch (error) {
       console.error('Add playlist to queue error:', error);
@@ -202,6 +210,10 @@ export const PlaylistProvider: React.FC<PlaylistProviderProps> = ({ children }) 
     );
   };
 
+  const setQueueRefreshCallback = useCallback((callback: (() => Promise<void>) | null) => {
+    queueRefreshCallbackRef.current = callback;
+  }, []);
+
   const value: PlaylistContextType = {
     playlists,
     loading,
@@ -214,7 +226,8 @@ export const PlaylistProvider: React.FC<PlaylistProviderProps> = ({ children }) 
     removeTrackFromPlaylist,
     addPlaylistToQueue,
     isTrackInPlaylist,
-    getPlaylistsContainingTrack
+    getPlaylistsContainingTrack,
+    setQueueRefreshCallback
   };
 
   return (
