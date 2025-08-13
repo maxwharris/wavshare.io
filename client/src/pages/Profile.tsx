@@ -192,7 +192,7 @@ const Profile: React.FC = () => {
     if (activeTab === 'upvoted' && userId && upvotedPosts.length === 0) {
       fetchUpvotedPosts();
     }
-  }, [activeTab, userId]);
+  }, [activeTab, userId, fetchUpvotedPosts, upvotedPosts.length]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -650,14 +650,12 @@ const Profile: React.FC = () => {
                             onClick={() => handlePlayAudio(post)}
                             className="btn-primary hover-glow flex items-center space-x-2"
                           >
-                            <span>▶️</span>
                             <span>Play</span>
                           </button>
                           <a
                             href={API_ENDPOINTS.POST_DOWNLOAD(post.id)}
                             className="flex items-center space-x-2 px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25"
                           >
-                            <span>⬇️</span>
                             <span>Download</span>
                           </a>
                           {user && (
@@ -677,7 +675,6 @@ const Profile: React.FC = () => {
                                     : 'bg-orange-600 hover:bg-orange-500 text-white hover:shadow-lg hover:shadow-orange-500/25'
                                 }`}
                               >
-                                <span>⏭️</span>
                                 <span>{isInQueue(post.id) ? 'In Queue' : 'Play Next'}</span>
                               </button>
                               <button
@@ -695,7 +692,6 @@ const Profile: React.FC = () => {
                                     : 'bg-purple-600 hover:bg-purple-500 text-white hover:shadow-lg hover:shadow-purple-500/25'
                                 }`}
                               >
-                                <span>📋</span>
                                 <span>{isInQueue(post.id) ? 'In Queue' : 'Add to Queue'}</span>
                               </button>
                             </>

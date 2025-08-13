@@ -33,4 +33,3 @@ To add:
 Existing Issues:
 - Logs out when deleting comment
 - Fast forward and rewind button functionality
-- Search broken

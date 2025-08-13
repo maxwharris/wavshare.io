@@ -670,14 +670,12 @@ const PostDetail: React.FC = () => {
                   onClick={handlePlayAudio}
                   className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  <span>▶️</span>
                   <span>Play</span>
                 </button>
                 <button
                   onClick={handleDownload}
                   className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
-                  <span>⬇️</span>
                   <span>Download</span>
                 </button>
                 {user && (
@@ -697,7 +695,6 @@ const PostDetail: React.FC = () => {
                           : 'bg-orange-600 text-white hover:bg-orange-700'
                       }`}
                     >
-                      <span>⏭️</span>
                       <span>{isInQueue(post.id) ? 'In Queue' : 'Play Next'}</span>
                     </button>
                     <button
@@ -715,7 +712,6 @@ const PostDetail: React.FC = () => {
                           : 'bg-purple-600 text-white hover:bg-purple-700'
                       }`}
                     >
-                      <span>📋</span>
                       <span>{isInQueue(post.id) ? 'In Queue' : 'Add to Queue'}</span>
                     </button>
                   </>
