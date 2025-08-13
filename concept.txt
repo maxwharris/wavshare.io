@@ -1,0 +1,16 @@
+I want to make a website where users can post self-made samples OR links to songs on Youtube, and other users can download and reply with their own remix.
+
+1. Users will be able to make an account using their email. DONE
+    -Require username, email, password. DONE
+    -Require email verification before allowing users to post/reply.
+
+2. Users can upload and post an MP3 or Youtube link. Posts should include a title, description, and tags. DONE
+    -Other users will be able to listen and download the uploaded MP3 and reply to the original post with a remix of the original MP3.  DONE
+    -Users will be able to upvote/downvote and comment on posts/MP3 replies. DONE
+    -Audio played from posts/replies should be able to be played seamlessly while browsing the site (like Soundcloud). DONE
+    -Post/reply audio can be added to a queue.
+    -User will receive notifications when they receive a reply on their post. DONE
+    -Users who reply will receive notifications when the receive a reply to their reply. DONE
+    
+3. Users should have profile pages with a custom username, profile photo, description, and a feed of their posts/replies.  DONE
+    -Settings page where users can customize their profile. DONE

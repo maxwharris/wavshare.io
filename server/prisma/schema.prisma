@@ -1,0 +1,170 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../../database/remixthis.db"
+}
+
+model User {
+  id          String   @id @default(cuid())
+  username    String   @unique
+  email       String   @unique
+  passwordHash String  @map("password_hash")
+  emailVerified Boolean @default(false) @map("email_verified")
+  emailVerificationToken String? @map("email_verification_token")
+  emailVerificationExpires DateTime? @map("email_verification_expires")
+  profilePhoto String? @map("profile_photo")
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  posts        Post[]
+  votes        Vote[]
+  comments     Comment[]
+  commentVotes CommentVote[]
+  remixes      Remix[]
+  notifications Notification[]
+  sentNotifications Notification[] @relation("NotificationFrom")
+
+  @@map("users")
+}
+
+model Post {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  title       String
+  description String?
+  filePath    String?  @map("file_path")
+  youtubeUrl  String?  @map("youtube_url")
+  postType    String   @map("post_type")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags         PostTag[]
+  votes        Vote[]
+  comments     Comment[]
+  originalRemixes Remix[] @relation("OriginalPost")
+  remixPosts   Remix[]    @relation("RemixPost")
+  notifications Notification[]
+
+  @@map("posts")
+}
+
+model Tag {
+  id   String @id @default(cuid())
+  name String @unique
+
+  // Relations
+  posts PostTag[]
+
+  @@map("tags")
+}
+
+model PostTag {
+  postId String @map("post_id")
+  tagId  String @map("tag_id")
+
+  // Relations
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("post_tags")
+}
+
+model Remix {
+  id             String   @id @default(cuid())
+  originalPostId String   @map("original_post_id")
+  remixPostId    String   @map("remix_post_id")
+  userId         String   @map("user_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  // Relations
+  originalPost Post @relation("OriginalPost", fields: [originalPostId], references: [id], onDelete: Cascade)
+  remixPost    Post @relation("RemixPost", fields: [remixPostId], references: [id], onDelete: Cascade)
+  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([originalPostId, remixPostId])
+  @@map("remixes")
+}
+
+model Vote {
+  id       String   @id @default(cuid())
+  userId   String   @map("user_id")
+  postId   String   @map("post_id")
+  voteType String   @map("vote_type")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@map("votes")
+}
+
+model Comment {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  postId          String   @map("post_id")
+  parentCommentId String?  @map("parent_comment_id")
+  content         String
+  filePath        String?  @map("file_path")
+  isRemix         Boolean  @default(false) @map("is_remix")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post          Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parentComment Comment?      @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies       Comment[]     @relation("CommentReplies")
+  votes         CommentVote[]
+  notifications Notification[]
+
+  @@map("comments")
+}
+
+model CommentVote {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  commentId String   @map("comment_id")
+  voteType  String   @map("vote_type")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
+  @@map("comment_votes")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  type      String   // 'POST_COMMENT', 'COMMENT_REPLY'
+  title     String
+  message   String
+  postId    String?  @map("post_id")
+  commentId String?  @map("comment_id")
+  fromUserId String  @map("from_user_id")
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post     Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment  Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  fromUser User     @relation("NotificationFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
