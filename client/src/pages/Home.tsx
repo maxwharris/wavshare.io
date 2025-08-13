@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAudio } from '../contexts/AudioContext.tsx';
+import ProfileAvatar from '../components/ProfileAvatar.tsx';
 
 interface Post {
   id: string;
@@ -179,9 +180,7 @@ const Home: React.FC = () => {
               <div key={post.id} className="post-card p-6 hover-lift">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
-                    <div className="user-avatar w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold">
-                      {post.user.username.charAt(0).toUpperCase()}
-                    </div>
+                    <ProfileAvatar user={post.user} size="lg" />
                     <div>
                       <Link 
                         to={`/profile/${post.user.id}`}

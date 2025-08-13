@@ -83,6 +83,7 @@ const Profile: React.FC = () => {
     description: ''
   });
   const [updating, setUpdating] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const { user, token } = useAuth();
   const { playTrack } = useAudio();
@@ -185,6 +186,85 @@ const Profile: React.FC = () => {
     }
   };
 
+  const handleProfilePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user || !token) return;
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Check file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be less than 5MB');
+      return;
+    }
+
+    setUploadingPhoto(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('profilePhoto', file);
+
+      const response = await fetch('http://localhost:5000/api/users/profile/photo', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setProfile(prev => prev ? {
+          ...prev,
+          profilePhoto: data.user.profilePhoto
+        } : null);
+      } else {
+        alert(data.message || 'Failed to upload profile photo');
+      }
+    } catch (error) {
+      console.error('Upload profile photo error:', error);
+      alert('Network error. Please try again.');
+    } finally {
+      setUploadingPhoto(false);
+      // Reset file input
+      e.target.value = '';
+    }
+  };
+
+  const handleDeleteProfilePhoto = async () => {
+    if (!user || !token) return;
+
+    if (!confirm('Are you sure you want to delete your profile photo?')) return;
+
+    try {
+      const response = await fetch('http://localhost:5000/api/users/profile/photo', {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setProfile(prev => prev ? {
+          ...prev,
+          profilePhoto: undefined
+        } : null);
+      } else {
+        alert(data.message || 'Failed to delete profile photo');
+      }
+    } catch (error) {
+      console.error('Delete profile photo error:', error);
+      alert('Network error. Please try again.');
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -223,8 +303,38 @@ const Profile: React.FC = () => {
       <div className="card">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center space-x-4">
-            <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-2xl">
-              {profile.username.charAt(0).toUpperCase()}
+            <div className="relative">
+              {profile.profilePhoto ? (
+                <img
+                  src={`http://localhost:5000/${profile.profilePhoto}`}
+                  alt={`${profile.username}'s profile`}
+                  className="w-20 h-20 rounded-full object-cover border-2 border-slate-600"
+                />
+              ) : (
+                <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-2xl border-2 border-slate-600">
+                  {profile.username.charAt(0).toUpperCase()}
+                </div>
+              )}
+              {isOwnProfile && (
+                <div className="absolute -bottom-1 -right-1">
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProfilePhotoUpload}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      disabled={uploadingPhoto}
+                    />
+                    <button
+                      className="w-8 h-8 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center text-white text-sm transition-colors disabled:opacity-50"
+                      disabled={uploadingPhoto}
+                      title="Upload profile photo"
+                    >
+                      {uploadingPhoto ? '⏳' : '📷'}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
             <div>
               <h1 className="text-3xl font-bold text-primary">{profile.username}</h1>
@@ -234,14 +344,25 @@ const Profile: React.FC = () => {
               )}
             </div>
           </div>
-          {isOwnProfile && (
-            <button
-              onClick={() => setIsEditing(!isEditing)}
-              className="btn-secondary"
-            >
-              {isEditing ? 'Cancel' : 'Edit Profile'}
-            </button>
-          )}
+          <div className="flex items-center space-x-2">
+            {isOwnProfile && profile.profilePhoto && (
+              <button
+                onClick={handleDeleteProfilePhoto}
+                className="btn-ghost text-red-400 hover:text-red-300 text-sm"
+                title="Delete profile photo"
+              >
+                🗑️
+              </button>
+            )}
+            {isOwnProfile && (
+              <button
+                onClick={() => setIsEditing(!isEditing)}
+                className="btn-secondary"
+              >
+                {isEditing ? 'Cancel' : 'Edit Profile'}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Edit Form */}

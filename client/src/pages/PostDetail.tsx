@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAudio } from '../contexts/AudioContext.tsx';
+import ProfileAvatar from '../components/ProfileAvatar.tsx';
 
 interface Post {
   id: string;
@@ -466,9 +467,7 @@ const PostDetail: React.FC = () => {
       <div className="card">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <div className="user-avatar w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold">
-              {post.user.username.charAt(0).toUpperCase()}
-            </div>
+            <ProfileAvatar user={post.user} size="xl" />
             <div>
               <Link 
                 to={`/profile/${post.user.id}`}
@@ -580,9 +579,7 @@ const PostDetail: React.FC = () => {
         {user ? (
           <form onSubmit={handleSubmitComment} className="mb-6">
             <div className="flex space-x-3">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                {user.username.charAt(0).toUpperCase()}
-              </div>
+              <ProfileAvatar user={user} size="md" showLink={false} />
               <div className="flex-1">
                 <textarea
                   value={newComment}
@@ -663,9 +660,7 @@ const PostDetail: React.FC = () => {
                   <div className={`flex space-x-3 p-4 rounded-lg ${
                     comment.isRemix ? 'bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-l-4 border-purple-500' : 'bg-slate-700/30 border border-slate-600'
                   }`}>
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                      {comment.user.username.charAt(0).toUpperCase()}
-                    </div>
+                    <ProfileAvatar user={comment.user} size="md" />
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
                         <Link 
@@ -753,9 +748,7 @@ const PostDetail: React.FC = () => {
                     <div className="ml-11 bg-slate-700/30 border border-slate-600 rounded-lg p-4">
                       <form onSubmit={handleReplySubmit}>
                         <div className="flex space-x-3">
-                          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-xs">
-                            {user!.username.charAt(0).toUpperCase()}
-                          </div>
+                          <ProfileAvatar user={user!} size="sm" showLink={false} />
                           <div className="flex-1">
                             <textarea
                               value={replyContent}
@@ -835,9 +828,7 @@ const PostDetail: React.FC = () => {
                           <div key={reply.id} className={`flex space-x-3 p-3 rounded-lg border-l-2 border-slate-600 ${
                             reply.isRemix ? 'bg-gradient-to-r from-purple-900/10 to-blue-900/10' : 'bg-slate-700/20'
                           }`}>
-                            <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-xs">
-                              {reply.user.username.charAt(0).toUpperCase()}
-                            </div>
+                            <ProfileAvatar user={reply.user} size="sm" />
                             <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-1">
                                 <Link 

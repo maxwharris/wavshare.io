@@ -6,7 +6,10 @@ import {
   updateUserProfile, 
   getCurrentUserProfile,
   getUserPosts,
-  getUserRemixes
+  getUserRemixes,
+  uploadProfilePhoto,
+  uploadUserProfilePhoto,
+  deleteUserProfilePhoto
 } from '../controllers/userController';
 
 const router = Router();
@@ -52,5 +55,19 @@ router.get('/:id/posts', getUserPosts);
 // @desc    Get user's remixes
 // @access  Public
 router.get('/:id/remixes', getUserRemixes);
+
+// @route   POST /api/users/profile/photo
+// @desc    Upload profile photo
+// @access  Private
+router.post('/profile/photo', 
+  auth,
+  uploadProfilePhoto.single('profilePhoto'),
+  uploadUserProfilePhoto
+);
+
+// @route   DELETE /api/users/profile/photo
+// @desc    Delete profile photo
+// @access  Private
+router.delete('/profile/photo', auth, deleteUserProfilePhoto);
 
 export default router;
