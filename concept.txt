@@ -18,14 +18,10 @@ I want to make a website where users can post self-made samples OR links to song
     -Settings page where users can customize their profile. DONE
 
 
-To add:
-- Add liked posts to profile. 
-- Add cover art to Post Create, Audio Player, and all pages. 
-	- Remixes inherit original post's cover art. 
-	- Default cover art if none uploaded. 
+To add: 
 - Queue
 	- Add option to add to queue or play next on Post Detail and posts across all pages. 
-	- Implement before implementing Playlists. 
+	- Implement before implementing Playlists.    
 - Playlists
 	- Display on profile. 
 	- Include in search. 
@@ -33,3 +29,8 @@ To add:
 - Track listen history. 
 	- Visible on profile if owner. 
 - Email Verification. 
+
+
+Existing Issues:
+- Logs out when deleting comment
+- Fast forward and rewind button functionality

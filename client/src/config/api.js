@@ -24,6 +24,7 @@ export const API_ENDPOINTS = {
   LOGIN: buildApiUrl('auth/login'),
   REGISTER: buildApiUrl('auth/register'),
   VERIFY_EMAIL: (token) => buildApiUrl(`auth/verify-email/${token}`),
+  ME: buildApiUrl('auth/me'),
   
   // Posts
   POSTS: buildApiUrl('posts'),

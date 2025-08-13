@@ -51,13 +51,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored token on app load
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      setToken(storedToken);
-      // TODO: Validate token and get user info
-    }
-    setLoading(false);
+    const validateToken = async () => {
+      const storedToken = localStorage.getItem('token');
+      if (!storedToken) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Validate token and get user info
+        const response = await fetch(API_ENDPOINTS.ME, {
+          headers: {
+            'Authorization': `Bearer ${storedToken}`
+          }
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+          setToken(storedToken);
+        } else {
+          // Token is invalid or expired, remove it
+          localStorage.removeItem('token');
+          setUser(null);
+          setToken(null);
+        }
+      } catch (error) {
+        console.error('Token validation error:', error);
+        // On network error, remove token to be safe
+        localStorage.removeItem('token');
+        setUser(null);
+        setToken(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    validateToken();
   }, []);
 
   const login = async (email: string, password: string) => {

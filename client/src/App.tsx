@@ -1,8 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext.tsx';
+import { AuthProvider, useAuth } from './contexts/AuthContext.tsx';
 import { AudioProvider } from './contexts/AudioContext.tsx';
 import { NotificationProvider } from './contexts/NotificationContext.tsx';
+import { QueueProvider } from './contexts/QueueContext.tsx';
 import Navbar from './components/Navbar.tsx';
 import Home from './pages/Home.tsx';
 import Login from './pages/Login.tsx';
@@ -16,10 +17,27 @@ import VerifyEmail from './pages/VerifyEmail.tsx';
 import AudioPlayer from './components/AudioPlayer.tsx';
 import './App.css';
 
-function App() {
+// Loading component for authentication initialization
+const LoadingScreen: React.FC = () => (
+  <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+    <div className="text-center">
+      <div className="spinner h-12 w-12 mx-auto mb-4"></div>
+      <p className="text-secondary">Loading...</p>
+    </div>
+  </div>
+);
+
+// Main app content component
+const AppContent: React.FC = () => {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
   return (
-    <AuthProvider>
-      <AudioProvider>
+    <AudioProvider>
+      <QueueProvider>
         <NotificationProvider>
           <Router>
             <div className="App min-h-screen bg-slate-900">
@@ -41,7 +59,15 @@ function App() {
             </div>
           </Router>
         </NotificationProvider>
-      </AudioProvider>
+      </QueueProvider>
+    </AudioProvider>
+  );
+};
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
     </AuthProvider>
   );
 }

@@ -31,6 +31,8 @@ model User {
   remixes                    Remix[]
   notifications              Notification[] @relation("NotificationUser")
   sentNotifications          Notification[] @relation("NotificationFromUser")
+  queueItems                 UserQueue[]
+  queueSettings              UserQueueSettings?
 
   @@map("users")
 }
@@ -55,6 +57,7 @@ model Post {
   originalRemixes Remix[]        @relation("OriginalPost")
   remixPosts      Remix[]        @relation("RemixPost")
   notifications   Notification[]
+  queueItems      UserQueue[]
 
   @@map("posts")
 }
@@ -163,4 +166,35 @@ model Notification {
   comment  Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
+}
+
+model UserQueue {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  postId    String   @map("post_id")
+  position  Int      // Order in queue
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, postId]) // Prevent duplicates
+  @@index([userId, position]) // Optimize queue ordering
+  @@map("user_queue")
+}
+
+model UserQueueSettings {
+  id         String  @id @default(cuid())
+  userId     String  @unique @map("user_id")
+  shuffleMode Boolean @default(false) @map("shuffle_mode")
+  repeatMode String  @default("off") @map("repeat_mode") // "off", "one", "all"
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_queue_settings")
 }

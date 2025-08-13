@@ -16,6 +16,7 @@ import commentRoutes from './routes/comments';
 import voteRoutes from './routes/votes';
 import notificationRoutes from './routes/notifications';
 import searchRoutes from './routes/search';
+import queueRoutes from './routes/queue';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
@@ -58,6 +59,7 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/votes', voteRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/queue', queueRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAudio } from '../contexts/AudioContext.tsx';
+import { useQueue } from '../contexts/QueueContext.tsx';
 import ProfileAvatar from '../components/ProfileAvatar.tsx';
 import { API_ENDPOINTS, API_CONFIG } from '../config/api';
 
@@ -110,6 +111,7 @@ const PostDetail: React.FC = () => {
 
   const { user, token } = useAuth();
   const { playTrack } = useAudio();
+  const { addToQueue, isInQueue } = useQueue();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -668,14 +670,36 @@ const PostDetail: React.FC = () => {
                   onClick={handlePlayAudio}
                   className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
+                  <span>▶️</span>
                   <span>Play</span>
                 </button>
                 <button
                   onClick={handleDownload}
                   className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
+                  <span>⬇️</span>
                   <span>Download</span>
                 </button>
+                {user && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        await addToQueue(post.id);
+                      } catch (error) {
+                        alert(error instanceof Error ? error.message : 'Failed to add to queue');
+                      }
+                    }}
+                    disabled={isInQueue(post.id)}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                      isInQueue(post.id)
+                        ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                        : 'bg-purple-600 text-white hover:bg-purple-700'
+                    }`}
+                  >
+                    <span>📋</span>
+                    <span>{isInQueue(post.id) ? 'In Queue' : 'Add to Queue'}</span>
+                  </button>
+                )}
               </>
             )}
             {post.postType === 'YOUTUBE_LINK' && (
