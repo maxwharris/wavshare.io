@@ -20,10 +20,19 @@
     "db:generate": "cd server && npx prisma generate",
     "db:studio": "cd server && npx prisma studio"
   },
-  "keywords": ["music", "remix", "collaboration", "audio", "sharing"],
+  "keywords": [
+    "music",
+    "remix",
+    "collaboration",
+    "audio",
+    "sharing"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "sqlite3": "^5.1.7"
   }
 }

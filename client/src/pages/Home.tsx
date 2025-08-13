@@ -12,6 +12,7 @@ interface Post {
   postType: 'AUDIO_FILE' | 'YOUTUBE_LINK';
   filePath?: string;
   youtubeUrl?: string;
+  coverArt?: string;
   createdAt: string;
   user: {
     id: string;
@@ -239,14 +240,32 @@ const Home: React.FC = () => {
                   </div>
                 )}
 
-                <Link to={`/post/${post.id}`} className="block mb-4">
-                  <h3 className="text-xl font-semibold text-primary hover:text-accent mb-2 transition-colors">
-                    {post.title}
-                  </h3>
-                  {post.description && (
-                    <p className="text-secondary mb-3">{post.description}</p>
-                  )}
-                </Link>
+                <div className="flex gap-4 mb-4">
+                  {/* Cover Art */}
+                  <div className="flex-shrink-0">
+                    <img
+                      src={post.coverArt ? buildServerUrl(post.coverArt) : buildServerUrl('uploads/covers/default.gif')}
+                      alt={`Cover art for ${post.title}`}
+                      className="w-24 h-24 object-cover rounded-lg border border-slate-600"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = buildServerUrl('uploads/covers/default.gif');
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Post Content */}
+                  <div className="flex-1">
+                    <Link to={`/post/${post.id}`} className="block">
+                      <h3 className="text-xl font-semibold text-primary hover:text-accent mb-2 transition-colors">
+                        {post.title}
+                      </h3>
+                      {post.description && (
+                        <p className="text-secondary mb-3">{post.description}</p>
+                      )}
+                    </Link>
+                  </div>
+                </div>
 
                 {post.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-4">

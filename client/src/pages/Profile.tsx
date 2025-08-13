@@ -18,6 +18,7 @@ interface UserProfile {
     postType: 'AUDIO_FILE' | 'YOUTUBE_LINK';
     filePath?: string;
     youtubeUrl?: string;
+    coverArt?: string;
     createdAt: string;
     tags: Array<{
       id: string;
@@ -78,7 +79,7 @@ const Profile: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'posts' | 'remixes' | 'comments'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'remixes' | 'comments' | 'upvoted'>('posts');
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     username: '',
@@ -88,6 +89,8 @@ const Profile: React.FC = () => {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [sortBy, setSortBy] = useState('most_remixed');
   const [sortedPosts, setSortedPosts] = useState<UserProfile['posts']>([]);
+  const [upvotedPosts, setUpvotedPosts] = useState<any[]>([]);
+  const [upvotedLoading, setUpvotedLoading] = useState(false);
 
   const { user, token } = useAuth();
   const { playTrack } = useAudio();
@@ -159,6 +162,35 @@ const Profile: React.FC = () => {
   const handleSortChange = (newSortBy: string) => {
     setSortBy(newSortBy);
   };
+
+  const fetchUpvotedPosts = async () => {
+    if (!userId) return;
+
+    setUpvotedLoading(true);
+    try {
+      const response = await fetch(API_ENDPOINTS.USER_UPVOTED_POSTS(userId));
+      const data = await response.json();
+
+      if (response.ok) {
+        setUpvotedPosts(data.data || []);
+      } else {
+        console.error('Failed to fetch upvoted posts:', data.message);
+        setUpvotedPosts([]);
+      }
+    } catch (error) {
+      console.error('Fetch upvoted posts error:', error);
+      setUpvotedPosts([]);
+    } finally {
+      setUpvotedLoading(false);
+    }
+  };
+
+  // Fetch upvoted posts when the upvoted tab is selected
+  useEffect(() => {
+    if (activeTab === 'upvoted' && userId && upvotedPosts.length === 0) {
+      fetchUpvotedPosts();
+    }
+  }, [activeTab, userId]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -508,6 +540,16 @@ const Profile: React.FC = () => {
           >
             Recent Comments ({profile.comments.length})
           </button>
+          <button
+            onClick={() => setActiveTab('upvoted')}
+            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+              activeTab === 'upvoted'
+                ? 'border-blue-500 text-accent'
+                : 'border-transparent text-secondary hover:text-primary'
+            }`}
+          >
+            Upvoted ({upvotedPosts.length})
+          </button>
         </div>
 
         {/* Posts Tab */}
@@ -558,14 +600,32 @@ const Profile: React.FC = () => {
                     </div>
                   </div>
 
-                  <Link to={`/post/${post.id}`} className="block mb-4">
-                    <h3 className="text-xl font-semibold text-primary hover:text-accent mb-2 transition-colors">
-                      {post.title}
-                    </h3>
-                    {post.description && (
-                      <p className="text-secondary mb-3">{post.description}</p>
-                    )}
-                  </Link>
+                  <div className="flex gap-4 mb-4">
+                    {/* Cover Art Thumbnail */}
+                    <div className="flex-shrink-0">
+                      <img
+                        src={post.coverArt ? `${API_CONFIG.SERVER_URL}/${post.coverArt}` : `${API_CONFIG.SERVER_URL}/uploads/covers/default.gif`}
+                        alt={`Cover art for ${post.title}`}
+                        className="w-16 h-16 object-cover rounded-lg border border-slate-600 shadow-md"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = `${API_CONFIG.SERVER_URL}/uploads/covers/default.gif`;
+                        }}
+                      />
+                    </div>
+                    
+                    {/* Post Content */}
+                    <div className="flex-1">
+                      <Link to={`/post/${post.id}`} className="block">
+                        <h3 className="text-xl font-semibold text-primary hover:text-accent mb-2 transition-colors">
+                          {post.title}
+                        </h3>
+                        {post.description && (
+                          <p className="text-secondary mb-3">{post.description}</p>
+                        )}
+                      </Link>
+                    </div>
+                  </div>
 
                   {post.tags.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-4">
@@ -715,6 +775,135 @@ const Profile: React.FC = () => {
                   </p>
                 </div>
               ))
+            )}
+          </div>
+        )}
+
+        {/* Upvoted Tab */}
+        {activeTab === 'upvoted' && (
+          <div className="space-y-4">
+            {upvotedLoading ? (
+              <div className="text-center py-8">
+                <div className="spinner h-8 w-8 mx-auto"></div>
+                <p className="text-secondary mt-2">Loading upvoted posts...</p>
+              </div>
+            ) : upvotedPosts.length === 0 ? (
+              <p className="text-muted text-center py-8">No upvoted posts yet.</p>
+            ) : (
+              <>
+                <div className="text-sm text-secondary mb-4">
+                  {upvotedPosts.length} upvoted post{upvotedPosts.length !== 1 ? 's' : ''}
+                </div>
+                {upvotedPosts.map((post) => (
+                  <div key={post.id} className="post-card p-6 hover-lift bg-gradient-to-r from-green-900/10 to-blue-900/10 border-green-500/20">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <ProfileAvatar user={post.user} size="md" />
+                        <div>
+                          <div className="font-semibold text-primary">
+                            {post.user?.username}
+                          </div>
+                          <p className="text-sm text-muted">
+                            Posted {formatDate(post.createdAt)}
+                            {post.upvotedAt && (
+                              <span className="text-green-400 ml-2">
+                                • Upvoted {formatDate(post.upvotedAt)}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm text-muted">
+                        <span>💬 {post._count.comments}</span>
+                        <span className="text-green-400">👍 {post._count.votes}</span>
+                        <span>🎵 {post._count.originalRemixes}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 mb-4">
+                      {/* Cover Art Thumbnail */}
+                      <div className="flex-shrink-0">
+                        <img
+                          src={post.coverArt ? `${API_CONFIG.SERVER_URL}/${post.coverArt}` : `${API_CONFIG.SERVER_URL}/uploads/covers/default.gif`}
+                          alt={`Cover art for ${post.title}`}
+                          className="w-16 h-16 object-cover rounded-lg border border-slate-600 shadow-md"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = `${API_CONFIG.SERVER_URL}/uploads/covers/default.gif`;
+                          }}
+                        />
+                      </div>
+                      
+                      {/* Post Content */}
+                      <div className="flex-1">
+                        <Link to={`/post/${post.id}`} className="block">
+                          <h3 className="text-xl font-semibold text-primary hover:text-accent mb-2 transition-colors">
+                            {post.title}
+                          </h3>
+                          {post.description && (
+                            <p className="text-secondary mb-3">{post.description}</p>
+                          )}
+                        </Link>
+                      </div>
+                    </div>
+
+                    {post.tags && post.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {post.tags.map((tag: any) => (
+                          <span 
+                            key={tag.id}
+                            className="tag"
+                          >
+                            #{tag.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        {post.postType === 'AUDIO_FILE' && post.filePath && (
+                          <>
+                            <button
+                              onClick={() => handlePlayAudio(post)}
+                              className="btn-primary hover-glow flex items-center space-x-2"
+                            >
+                              <span>Play</span>
+                            </button>
+                            <a
+                              href={API_ENDPOINTS.POST_DOWNLOAD(post.id)}
+                              className="flex items-center space-x-2 px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25"
+                            >
+                              <span>Download</span>
+                            </a>
+                          </>
+                        )}
+                        {post.postType === 'YOUTUBE_LINK' && (
+                          <a
+                            href={post.youtubeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-red-500/25"
+                          >
+                            <span>Watch on YouTube</span>
+                          </a>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-sm text-muted capitalize">
+                          {post.postType.replace('_', ' ').toLowerCase()}
+                        </span>
+                        <Link
+                          to={`/post/${post.id}`}
+                          className="flex items-center space-x-1 px-3 py-2 bg-slate-600 hover:bg-slate-500 text-white text-sm rounded-lg transition-all duration-200 hover:shadow-lg"
+                        >
+                          <span>See More</span>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </>
             )}
           </div>
         )}

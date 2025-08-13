@@ -476,6 +476,93 @@ export const getUserRemixes = async (req: Request, res: Response): Promise<void>
   }
 };
 
+// @desc    Get user's upvoted posts
+// @route   GET /api/users/:id/upvoted
+// @access  Public
+export const getUserUpvotedPosts = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    // Check if user exists
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: { id: true, username: true }
+    });
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Get posts that the user has upvoted
+    const upvotedPosts = await prisma.vote.findMany({
+      where: {
+        userId: id,
+        voteType: 'UPVOTE'
+      },
+      skip,
+      take: limit,
+      orderBy: {
+        createdAt: 'desc'
+      },
+      include: {
+        post: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                profilePhoto: true
+              }
+            },
+            tags: true,
+            _count: {
+              select: {
+                votes: true,
+                comments: true,
+                originalRemixes: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const total = await prisma.vote.count({
+      where: {
+        userId: id,
+        voteType: 'UPVOTE'
+      }
+    });
+
+    // Extract just the posts from the votes
+    const posts = upvotedPosts.map(vote => ({
+      ...vote.post,
+      upvotedAt: vote.createdAt
+    }));
+
+    res.json({
+      data: posts,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      },
+      user: {
+        id: user.id,
+        username: user.username
+      }
+    });
+  } catch (error) {
+    console.error('Get user upvoted posts error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // @desc    Upload profile photo
 // @route   POST /api/users/profile/photo
 // @access  Private

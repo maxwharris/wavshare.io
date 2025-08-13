@@ -14,6 +14,7 @@ const CreatePost: React.FC = () => {
     key: ''
   });
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [coverArt, setCoverArt] = useState<File | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -52,6 +53,24 @@ const CreatePost: React.FC = () => {
         return;
       }
       setAudioFile(file);
+      setErrors([]);
+    }
+  };
+
+  const handleCoverArtChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type (images and GIFs)
+      if (!file.type.startsWith('image/')) {
+        setErrors(['Please select a valid image file (including GIFs)']);
+        return;
+      }
+      // Validate file size (10MB limit for images)
+      if (file.size > 10 * 1024 * 1024) {
+        setErrors(['Cover art file size must be less than 10MB']);
+        return;
+      }
+      setCoverArt(file);
       setErrors([]);
     }
   };
@@ -102,6 +121,11 @@ const CreatePost: React.FC = () => {
 
       if (formData.postType === 'AUDIO_FILE' && audioFile) {
         formDataToSend.append('audioFile', audioFile);
+      }
+
+      // Add cover art if provided
+      if (coverArt) {
+        formDataToSend.append('coverArt', coverArt);
       }
 
       // Handle tags, BPM, and Key
@@ -272,6 +296,38 @@ const CreatePost: React.FC = () => {
               />
             </div>
           )}
+
+          {/* Cover Art Upload */}
+          <div>
+            <label htmlFor="coverArt" className="block text-sm font-medium text-gray-700 mb-1">
+              Cover Art (Optional)
+            </label>
+            <input
+              type="file"
+              id="coverArt"
+              accept="image/*"
+              onChange={handleCoverArtChange}
+              className="form-input"
+              disabled={isLoading}
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              Upload cover art for your post. Supports images and GIFs. Max size: 10MB
+            </p>
+            {coverArt && (
+              <div className="mt-2">
+                <p className="text-sm text-green-600">
+                  Selected: {coverArt.name} ({(coverArt.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+                {coverArt.type.startsWith('image/') && (
+                  <img
+                    src={URL.createObjectURL(coverArt)}
+                    alt="Cover art preview"
+                    className="mt-2 w-32 h-32 object-cover rounded-lg border border-gray-300"
+                  />
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Tags */}
           <div>

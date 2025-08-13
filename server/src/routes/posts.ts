@@ -24,7 +24,10 @@ router.get('/', getPosts);
 router.post(
   '/',
   auth,
-  upload.single('audioFile'),
+  upload.fields([
+    { name: 'audioFile', maxCount: 1 },
+    { name: 'coverArt', maxCount: 1 }
+  ]),
   [
     body('title')
       .isLength({ min: 1, max: 200 })
@@ -43,7 +46,11 @@ router.post(
     body('tags')
       .optional()
       .isArray()
-      .withMessage('Tags must be an array')
+      .withMessage('Tags must be an array'),
+    body('originalPostId')
+      .optional()
+      .isString()
+      .withMessage('Original post ID must be a string')
   ],
   createPost
 );

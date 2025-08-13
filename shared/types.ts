@@ -18,6 +18,7 @@ export interface Post {
   description?: string;
   filePath?: string;
   youtubeUrl?: string;
+  coverArt?: string;
   postType: PostType;
   createdAt: string;
   updatedAt: string;

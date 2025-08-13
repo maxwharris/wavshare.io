@@ -8,8 +8,8 @@ import fs from 'fs';
 
 const prisma = new PrismaClient();
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
+// Configure multer for audio file uploads
+const audioStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = 'uploads/audio';
     if (!fs.existsSync(uploadDir)) {
@@ -23,7 +23,22 @@ const storage = multer.diskStorage({
   }
 });
 
-const fileFilter = (req: any, file: any, cb: any) => {
+// Configure multer for cover art uploads
+const coverStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = 'uploads/covers';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'cover-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const audioFileFilter = (req: any, file: any, cb: any) => {
   // Accept only audio files
   if (file.mimetype.startsWith('audio/')) {
     cb(null, true);
@@ -32,11 +47,58 @@ const fileFilter = (req: any, file: any, cb: any) => {
   }
 };
 
+const coverFileFilter = (req: any, file: any, cb: any) => {
+  // Accept images and GIFs
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files (including GIFs) are allowed for cover art!'), false);
+  }
+};
+
+// Multer configuration for posts with both audio and cover art
 export const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      let uploadDir;
+      if (file.fieldname === 'audioFile') {
+        uploadDir = 'uploads/audio';
+      } else if (file.fieldname === 'coverArt') {
+        uploadDir = 'uploads/covers';
+      } else {
+        return cb(new Error('Invalid field name'), '');
+      }
+      
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      let prefix = file.fieldname === 'audioFile' ? 'audio' : 'cover';
+      cb(null, prefix + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+  }),
+  fileFilter: (req: any, file: any, cb: any) => {
+    if (file.fieldname === 'audioFile') {
+      if (file.mimetype.startsWith('audio/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only audio files are allowed for audio field!'), false);
+      }
+    } else if (file.fieldname === 'coverArt') {
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files (including GIFs) are allowed for cover art!'), false);
+      }
+    } else {
+      cb(new Error('Invalid field name'), false);
+    }
+  },
   limits: {
-    fileSize: 250 * 1024 * 1024 // 250MB limit
+    fileSize: 250 * 1024 * 1024 // 250MB limit for audio, will be much smaller for images
   }
 });
 
@@ -158,8 +220,9 @@ export const createPost = async (req: AuthRequest, res: Response): Promise<void>
       return;
     }
 
-    const { title, description, postType, youtubeUrl, tags } = req.body;
+    const { title, description, postType, youtubeUrl, tags, originalPostId } = req.body;
     const userId = req.user!.id;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     // Validate post type
     if (!['AUDIO_FILE', 'YOUTUBE_LINK'].includes(postType)) {
@@ -173,7 +236,7 @@ export const createPost = async (req: AuthRequest, res: Response): Promise<void>
       return;
     }
 
-    if (postType === 'AUDIO_FILE' && !req.file) {
+    if (postType === 'AUDIO_FILE' && (!files || !files.audioFile || !files.audioFile[0])) {
       res.status(400).json({ message: 'Audio file is required for audio posts' });
       return;
     }
@@ -188,9 +251,29 @@ export const createPost = async (req: AuthRequest, res: Response): Promise<void>
 
     if (postType === 'YOUTUBE_LINK') {
       postData.youtubeUrl = youtubeUrl;
-    } else if (postType === 'AUDIO_FILE' && req.file) {
-      postData.filePath = req.file.path;
+    } else if (postType === 'AUDIO_FILE' && files && files.audioFile && files.audioFile[0]) {
+      postData.filePath = files.audioFile[0].path;
     }
+
+    // Handle cover art
+    let coverArtPath = 'uploads/covers/default.gif'; // Default cover art
+
+    if (originalPostId) {
+      // This is a remix - inherit cover art from original post
+      const originalPost = await prisma.post.findUnique({
+        where: { id: originalPostId },
+        select: { coverArt: true }
+      });
+      
+      if (originalPost && originalPost.coverArt) {
+        coverArtPath = originalPost.coverArt;
+      }
+    } else if (files && files.coverArt && files.coverArt[0]) {
+      // User uploaded custom cover art
+      coverArtPath = files.coverArt[0].path;
+    }
+
+    postData.coverArt = coverArtPath;
 
     const post = await prisma.post.create({
       data: postData,
@@ -212,6 +295,17 @@ export const createPost = async (req: AuthRequest, res: Response): Promise<void>
         }
       }
     });
+
+    // If this is a remix, create the remix relationship
+    if (originalPostId) {
+      await prisma.remix.create({
+        data: {
+          userId,
+          originalPostId,
+          remixPostId: post.id
+        }
+      });
+    }
 
     // Handle tags if provided
     if (tags && Array.isArray(tags) && tags.length > 0) {

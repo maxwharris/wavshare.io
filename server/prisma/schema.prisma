@@ -7,30 +7,30 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:../../database/remixthis.db"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id          String   @id @default(cuid())
-  username    String   @unique
-  email       String   @unique
-  passwordHash String  @map("password_hash")
-  emailVerified Boolean @default(false) @map("email_verified")
-  emailVerificationToken String? @map("email_verification_token")
-  emailVerificationExpires DateTime? @map("email_verification_expires")
-  profilePhoto String? @map("profile_photo")
-  description String?
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id                         String   @id @default(cuid())
+  username                   String   @unique
+  email                      String   @unique
+  passwordHash               String   @map("password_hash")
+  emailVerified              Boolean  @default(false) @map("email_verified")
+  emailVerificationToken     String?  @map("email_verification_token")
+  emailVerificationExpires   DateTime? @map("email_verification_expires")
+  profilePhoto               String?  @map("profile_photo")
+  description                String?
+  createdAt                  DateTime @default(now()) @map("created_at")
+  updatedAt                  DateTime @updatedAt @map("updated_at")
 
   // Relations
-  posts        Post[]
-  votes        Vote[]
-  comments     Comment[]
-  commentVotes CommentVote[]
-  remixes      Remix[]
-  notifications Notification[]
-  sentNotifications Notification[] @relation("NotificationFrom")
+  posts                      Post[]
+  votes                      Vote[]
+  comments                   Comment[]
+  commentVotes               CommentVote[]
+  remixes                    Remix[]
+  notifications              Notification[] @relation("NotificationUser")
+  sentNotifications          Notification[] @relation("NotificationFromUser")
 
   @@map("users")
 }
@@ -43,27 +43,28 @@ model Post {
   filePath    String?  @map("file_path")
   youtubeUrl  String?  @map("youtube_url")
   postType    String   @map("post_type")
+  coverArt    String?  @map("coverArt")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   // Relations
-  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tags         PostTag[]
-  votes        Vote[]
-  comments     Comment[]
-  originalRemixes Remix[] @relation("OriginalPost")
-  remixPosts   Remix[]    @relation("RemixPost")
-  notifications Notification[]
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags            Tag[]          @relation("PostTags")
+  votes           Vote[]
+  comments        Comment[]
+  originalRemixes Remix[]        @relation("OriginalPost")
+  remixPosts      Remix[]        @relation("RemixPost")
+  notifications   Notification[]
 
   @@map("posts")
 }
 
 model Tag {
-  id   String @id @default(cuid())
-  name String @unique
+  id    String @id @default(cuid())
+  name  String @unique
 
   // Relations
-  posts PostTag[]
+  posts Post[] @relation("PostTags")
 
   @@map("tags")
 }
@@ -71,10 +72,6 @@ model Tag {
 model PostTag {
   postId String @map("post_id")
   tagId  String @map("tag_id")
-
-  // Relations
-  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([postId, tagId])
   @@map("post_tags")
@@ -92,7 +89,6 @@ model Remix {
   remixPost    Post @relation("RemixPost", fields: [remixPostId], references: [id], onDelete: Cascade)
   user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([originalPostId, remixPostId])
   @@map("remixes")
 }
 
@@ -123,12 +119,12 @@ model Comment {
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   // Relations
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  post          Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
-  parentComment Comment?      @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
-  replies       Comment[]     @relation("CommentReplies")
-  votes         CommentVote[]
-  notifications Notification[]
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post            Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parentComment   Comment?      @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies         Comment[]     @relation("CommentReplies")
+  votes           CommentVote[]
+  notifications   Notification[]
 
   @@map("comments")
 }
@@ -149,22 +145,22 @@ model CommentVote {
 }
 
 model Notification {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  type      String   // 'POST_COMMENT', 'COMMENT_REPLY'
-  title     String
-  message   String
-  postId    String?  @map("post_id")
-  commentId String?  @map("comment_id")
-  fromUserId String  @map("from_user_id")
-  isRead    Boolean  @default(false) @map("is_read")
-  createdAt DateTime @default(now()) @map("created_at")
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  type       String
+  title      String
+  message    String
+  postId     String?  @map("post_id")
+  commentId  String?  @map("comment_id")
+  fromUserId String   @map("from_user_id")
+  isRead     Boolean  @default(false) @map("is_read")
+  createdAt  DateTime @default(now()) @map("created_at")
 
   // Relations
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User     @relation("NotificationUser", fields: [userId], references: [id], onDelete: Cascade)
+  fromUser User     @relation("NotificationFromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
   post     Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
   comment  Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  fromUser User     @relation("NotificationFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
 }

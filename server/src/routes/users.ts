@@ -7,6 +7,7 @@ import {
   getCurrentUserProfile,
   getUserPosts,
   getUserRemixes,
+  getUserUpvotedPosts,
   uploadProfilePhoto,
   uploadUserProfilePhoto,
   deleteUserProfilePhoto
@@ -55,6 +56,11 @@ router.get('/:id/posts', getUserPosts);
 // @desc    Get user's remixes
 // @access  Public
 router.get('/:id/remixes', getUserRemixes);
+
+// @route   GET /api/users/:id/upvoted
+// @desc    Get user's upvoted posts
+// @access  Public
+router.get('/:id/upvoted', getUserUpvotedPosts);
 
 // @route   POST /api/users/profile/photo
 // @desc    Upload profile photo

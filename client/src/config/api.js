@@ -45,6 +45,7 @@ export const API_ENDPOINTS = {
   USER_PROFILE: buildApiUrl('users/profile'),
   USER_PROFILE_BY_ID: (userId) => buildApiUrl(`users/profile/${userId}`),
   USER_PROFILE_PHOTO: buildApiUrl('users/profile/photo'),
+  USER_UPVOTED_POSTS: (userId) => buildApiUrl(`users/${userId}/upvoted`),
   
   // Notifications
   NOTIFICATIONS: buildApiUrl('notifications'),

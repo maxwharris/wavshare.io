@@ -12,6 +12,7 @@ interface Post {
   postType: 'AUDIO_FILE' | 'YOUTUBE_LINK';
   filePath?: string;
   youtubeUrl?: string;
+  coverArt?: string;
   createdAt: string;
   user: {
     id: string;
@@ -567,9 +568,20 @@ const PostDetail: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Post Content */}
-      <div className="card">
+    <div 
+      className="fixed inset-0 top-16 overflow-y-auto"
+      style={{
+        backgroundImage: post.coverArt 
+          ? `linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), url(${API_CONFIG.SERVER_URL}/${post.coverArt})`
+          : `linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), url(${API_CONFIG.SERVER_URL}/uploads/covers/default.gif)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
+    >
+      <div className="max-w-4xl mx-auto relative z-10 py-6">
+        {/* Post Content */}
+        <div className="card bg-slate-800/90 backdrop-blur-sm border-slate-600/50 mb-6">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center space-x-3">
             <ProfileAvatar user={post.user} size="xl" />
@@ -588,11 +600,29 @@ const PostDetail: React.FC = () => {
           </span>
         </div>
 
-        <h1 className="text-3xl font-bold text-primary mb-4">{post.title}</h1>
-        
-        {post.description && (
-          <p className="text-secondary mb-6">{post.description}</p>
-        )}
+        <div className="flex gap-6 mb-6">
+          {/* Cover Art */}
+          <div className="flex-shrink-0">
+            <img
+              src={post.coverArt ? `${API_CONFIG.SERVER_URL}/${post.coverArt}` : `${API_CONFIG.SERVER_URL}/uploads/covers/default.gif`}
+              alt={`Cover art for ${post.title}`}
+              className="w-48 h-48 object-cover rounded-lg border border-slate-600 shadow-lg"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = `${API_CONFIG.SERVER_URL}/uploads/covers/default.gif`;
+              }}
+            />
+          </div>
+          
+          {/* Post Info */}
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-primary mb-4">{post.title}</h1>
+            
+            {post.description && (
+              <p className="text-secondary mb-4">{post.description}</p>
+            )}
+          </div>
+        </div>
 
         {/* Tags, BPM, and Key */}
         <div className="mb-6">
@@ -708,8 +738,11 @@ const PostDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* Comments Section */}
-      <div className="card">
+        </div>
+
+        {/* Comments Section */}
+        <div className="max-w-4xl mx-auto">
+          <div className="card bg-slate-800/90 backdrop-blur-sm border-slate-600/50">
         <h2 className="text-xl font-bold mb-4">Comments ({post._count.comments})</h2>
         
         {/* Add Comment Form */}
@@ -1060,6 +1093,7 @@ const PostDetail: React.FC = () => {
               );
             })
           )}
+        </div>
         </div>
       </div>
     </div>
