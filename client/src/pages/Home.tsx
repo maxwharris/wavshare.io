@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAudio } from '../contexts/AudioContext.tsx';
@@ -42,17 +42,15 @@ const Home: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState('most_remixed');
 
   const { user } = useAuth();
   const { playTrack } = useAudio();
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
+    setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/posts');
+      const response = await fetch(`http://localhost:5000/api/posts?sortBy=${sortBy}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -66,6 +64,14 @@ const Home: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  }, [sortBy]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
+  const handleSortChange = (newSortBy: string) => {
+    setSortBy(newSortBy);
   };
 
   const handlePlayAudio = (post: Post) => {
@@ -142,7 +148,25 @@ const Home: React.FC = () => {
       </div>
 
       <div id="posts-section" className="card">
-        <h2 className="text-2xl font-bold mb-6 text-primary">Recent Posts</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-primary">Recent Posts</h2>
+          <div className="flex items-center space-x-2">
+            <label className="text-sm text-secondary">Sort by:</label>
+            <select
+              value={sortBy}
+              onChange={(e) => handleSortChange(e.target.value)}
+              className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-primary focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="most_voted">Most Voted</option>
+              <option value="most_commented">Most Commented</option>
+              <option value="most_remixed">Most Remixed</option>
+              <option value="title_asc">Title A-Z</option>
+              <option value="title_desc">Title Z-A</option>
+            </select>
+          </div>
+        </div>
         
         {loading && (
           <div className="text-center py-8">
@@ -243,14 +267,12 @@ const Home: React.FC = () => {
                           onClick={() => handlePlayAudio(post)}
                           className="btn-primary hover-glow flex items-center space-x-2"
                         >
-                          <span>▶️</span>
                           <span>Play</span>
                         </button>
                         <a
                           href={`http://localhost:5000/api/posts/${post.id}/download`}
                           className="flex items-center space-x-2 px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25"
                         >
-                          <span>⬇️</span>
                           <span>Download</span>
                         </a>
                       </>
@@ -262,14 +284,21 @@ const Home: React.FC = () => {
                         rel="noopener noreferrer"
                         className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-red-500/25"
                       >
-                        <span>📺</span>
                         <span>Watch on YouTube</span>
                       </a>
                     )}
                   </div>
-                  <span className="text-sm text-muted capitalize">
-                    {post.postType.replace('_', ' ').toLowerCase()}
-                  </span>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm text-muted capitalize">
+                      {post.postType.replace('_', ' ').toLowerCase()}
+                    </span>
+                    <Link
+                      to={`/post/${post.id}`}
+                      className="flex items-center space-x-1 px-3 py-2 bg-slate-600 hover:bg-slate-500 text-white text-sm rounded-lg transition-all duration-200 hover:shadow-lg"
+                    >
+                      <span>See More</span>
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}

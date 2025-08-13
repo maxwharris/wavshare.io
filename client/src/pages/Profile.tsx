@@ -84,6 +84,8 @@ const Profile: React.FC = () => {
   });
   const [updating, setUpdating] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [sortBy, setSortBy] = useState('most_remixed');
+  const [sortedPosts, setSortedPosts] = useState<UserProfile['posts']>([]);
 
   const { user, token } = useAuth();
   const { playTrack } = useAudio();
@@ -104,6 +106,7 @@ const Profile: React.FC = () => {
 
         if (response.ok) {
           setProfile(data);
+          setSortedPosts(data.posts);
           setEditForm({
             username: data.username,
             description: data.description || ''
@@ -123,6 +126,37 @@ const Profile: React.FC = () => {
       fetchProfile();
     }
   }, [userId]);
+
+  // Sort posts when sortBy changes
+  useEffect(() => {
+    if (!profile?.posts) return;
+
+    const sorted = [...profile.posts].sort((a, b) => {
+      switch (sortBy) {
+        case 'oldest':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case 'most_voted':
+          return b._count.votes - a._count.votes;
+        case 'most_commented':
+          return b._count.comments - a._count.comments;
+        case 'most_remixed':
+          return b._count.originalRemixes - a._count.originalRemixes;
+        case 'title_asc':
+          return a.title.localeCompare(b.title);
+        case 'title_desc':
+          return b.title.localeCompare(a.title);
+        case 'newest':
+        default:
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+
+    setSortedPosts(sorted);
+  }, [profile?.posts, sortBy]);
+
+  const handleSortChange = (newSortBy: string) => {
+    setSortBy(newSortBy);
+  };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -239,7 +273,7 @@ const Profile: React.FC = () => {
   const handleDeleteProfilePhoto = async () => {
     if (!user || !token) return;
 
-    if (!confirm('Are you sure you want to delete your profile photo?')) return;
+    if (!window.confirm('Are you sure you want to delete your profile photo?')) return;
 
     try {
       const response = await fetch('http://localhost:5000/api/users/profile/photo', {
@@ -475,27 +509,64 @@ const Profile: React.FC = () => {
         {/* Posts Tab */}
         {activeTab === 'posts' && (
           <div className="space-y-4">
-            {profile.posts.length === 0 ? (
+            {profile.posts.length > 0 && (
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-sm text-secondary">
+                  {sortedPosts.length} post{sortedPosts.length !== 1 ? 's' : ''}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <label className="text-sm text-secondary">Sort by:</label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => handleSortChange(e.target.value)}
+                    className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-primary focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="most_voted">Most Voted</option>
+                    <option value="most_commented">Most Commented</option>
+                    <option value="most_remixed">Most Remixed</option>
+                    <option value="title_asc">Title A-Z</option>
+                    <option value="title_desc">Title Z-A</option>
+                  </select>
+                </div>
+              </div>
+            )}
+            {sortedPosts.length === 0 ? (
               <p className="text-muted text-center py-8">No posts yet.</p>
             ) : (
-              profile.posts.map((post) => (
-                <div key={post.id} className="post-card p-4 hover-lift">
-                  <div className="flex items-start justify-between mb-2">
-                    <Link 
-                      to={`/post/${post.id}`}
-                      className="text-lg font-semibold text-primary hover:text-accent transition-colors"
-                    >
-                      {post.title}
-                    </Link>
-                    <span className="text-sm text-muted capitalize">
-                      {post.postType.replace('_', ' ').toLowerCase()}
-                    </span>
+              sortedPosts.map((post) => (
+                <div key={post.id} className="post-card p-6 hover-lift">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        {profile?.username.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-primary">
+                          {profile?.username}
+                        </div>
+                        <p className="text-sm text-muted">{formatDate(post.createdAt)}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-4 text-sm text-muted">
+                      <span>💬 {post._count.comments}</span>
+                      <span>👍 {post._count.votes}</span>
+                      <span>🎵 {post._count.originalRemixes}</span>
+                    </div>
                   </div>
-                  {post.description && (
-                    <p className="text-secondary mb-3 line-clamp-2">{post.description}</p>
-                  )}
+
+                  <Link to={`/post/${post.id}`} className="block mb-4">
+                    <h3 className="text-xl font-semibold text-primary hover:text-accent mb-2 transition-colors">
+                      {post.title}
+                    </h3>
+                    {post.description && (
+                      <p className="text-secondary mb-3">{post.description}</p>
+                    )}
+                  </Link>
+
                   {post.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-3">
+                    <div className="flex flex-wrap gap-2 mb-4">
                       {post.tags.map((tag) => (
                         <span 
                           key={tag.id}
@@ -506,22 +577,47 @@ const Profile: React.FC = () => {
                       ))}
                     </div>
                   )}
+
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 text-sm text-muted">
-                      <span>👍 {post._count.votes}</span>
-                      <span>💬 {post._count.comments}</span>
-                      <span>🎵 {post._count.originalRemixes}</span>
-                      <span>{formatDate(post.createdAt)}</span>
+                    <div className="flex items-center space-x-3">
+                      {post.postType === 'AUDIO_FILE' && post.filePath && (
+                        <>
+                          <button
+                            onClick={() => handlePlayAudio(post)}
+                            className="btn-primary hover-glow flex items-center space-x-2"
+                          >
+                            <span>Play</span>
+                          </button>
+                          <a
+                            href={`http://localhost:5000/api/posts/${post.id}/download`}
+                            className="flex items-center space-x-2 px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25"
+                          >
+                            <span>Download</span>
+                          </a>
+                        </>
+                      )}
+                      {post.postType === 'YOUTUBE_LINK' && (
+                        <a
+                          href={post.youtubeUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-red-500/25"
+                        >
+                          <span>Watch on YouTube</span>
+                        </a>
+                      )}
                     </div>
-                    {post.postType === 'AUDIO_FILE' && post.filePath && (
-                      <button
-                        onClick={() => handlePlayAudio(post)}
-                        className="btn-primary hover-glow flex items-center space-x-1 text-sm"
+                    <div className="flex items-center space-x-3">
+                      <span className="text-sm text-muted capitalize">
+                        {post.postType.replace('_', ' ').toLowerCase()}
+                      </span>
+                      <Link
+                        to={`/post/${post.id}`}
+                        className="flex items-center space-x-1 px-3 py-2 bg-slate-600 hover:bg-slate-500 text-white text-sm rounded-lg transition-all duration-200 hover:shadow-lg"
                       >
-                        <span>▶️</span>
-                        <span>Play</span>
-                      </button>
-                    )}
+                        <span>See More</span>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               ))

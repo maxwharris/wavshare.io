@@ -46,13 +46,50 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
+    const sortBy = req.query.sortBy as string || 'newest';
+
+    // Define sorting options
+    let orderBy: any = { createdAt: 'desc' }; // default to newest
+
+    switch (sortBy) {
+      case 'oldest':
+        orderBy = { createdAt: 'asc' };
+        break;
+      case 'most_voted':
+        // We'll need to calculate vote scores in a subquery
+        orderBy = [
+          { votes: { _count: 'desc' } },
+          { createdAt: 'desc' }
+        ];
+        break;
+      case 'most_commented':
+        orderBy = [
+          { comments: { _count: 'desc' } },
+          { createdAt: 'desc' }
+        ];
+        break;
+      case 'most_remixed':
+        orderBy = [
+          { originalRemixes: { _count: 'desc' } },
+          { createdAt: 'desc' }
+        ];
+        break;
+      case 'title_asc':
+        orderBy = { title: 'asc' };
+        break;
+      case 'title_desc':
+        orderBy = { title: 'desc' };
+        break;
+      case 'newest':
+      default:
+        orderBy = { createdAt: 'desc' };
+        break;
+    }
 
     const posts = await prisma.post.findMany({
       skip,
       take: limit,
-      orderBy: {
-        createdAt: 'desc'
-      },
+      orderBy,
       include: {
         user: {
           select: {
@@ -95,7 +132,8 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
         limit,
         total,
         totalPages: Math.ceil(total / limit)
-      }
+      },
+      sortBy
     });
   } catch (error) {
     console.error('Get posts error:', error);
