@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAudio } from '../contexts/AudioContext.tsx';
+import ProfileAvatar from '../components/ProfileAvatar.tsx';
 import { API_ENDPOINTS, API_CONFIG } from '../config/api';
 
 interface UserProfile {
@@ -542,9 +543,7 @@ const Profile: React.FC = () => {
                 <div key={post.id} className="post-card p-6 hover-lift">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                        {profile?.username.charAt(0).toUpperCase()}
-                      </div>
+                      <ProfileAvatar user={profile} size="md" />
                       <div>
                         <div className="font-semibold text-primary">
                           {profile?.username}
