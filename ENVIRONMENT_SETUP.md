@@ -4,7 +4,7 @@ This guide explains how to set up environment configurations for both developmen
 
 ## Overview
 
-The RemixThis application uses separate environment files for different deployment scenarios:
+The wavshare application uses separate environment files for different deployment scenarios:
 
 ### Client (React App)
 - `.env` - Default configuration (development)

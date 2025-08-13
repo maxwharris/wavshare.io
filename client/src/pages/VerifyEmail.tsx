@@ -55,7 +55,7 @@ const VerifyEmail: React.FC = () => {
             <div className="text-green-600 text-6xl mb-4">✓</div>
             <p className="text-green-700 mb-6">{message}</p>
             <p className="text-gray-600 mb-4">
-              You can now create posts and remixes on RemixThis!
+              You can now create posts and remixes on wavshare!
             </p>
             <Link to="/login" className="btn-primary">
               Sign In

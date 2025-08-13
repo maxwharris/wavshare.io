@@ -1,7 +1,7 @@
 {
   "name": "remixthis-server",
   "version": "1.0.0",
-  "description": "Backend server for RemixThis music collaboration platform",
+  "description": "Backend server for wavshare music collaboration platform",
   "main": "src/index.js",
   "scripts": {
     "dev": "nodemon src/index.ts",

@@ -126,7 +126,7 @@ const Home: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="text-center mb-12">
-        <h1 className="remix-logo text-6xl mb-4">RemixThis</h1>
+        <h1 className="remix-logo text-6xl mb-4">wavshare</h1>
         <p className="text-xl text-secondary mb-8">
           A music collaboration platform for sharing and remixing audio content
         </p>

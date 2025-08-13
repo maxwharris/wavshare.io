@@ -1,4 +1,4 @@
-# RemixThis - Music Collaboration Platform
+# wavshare - Music Collaboration Platform
 
 A full-stack music collaboration platform where users can share original music samples or YouTube links, and other users can download and create remixes. The platform facilitates music collaboration through a social media-like interface with voting, commenting, remix tracking, and professional music metadata features.
 
@@ -86,7 +86,7 @@ A full-stack music collaboration platform where users can share original music s
    EMAIL_PORT=587
    EMAIL_USER=your-email@gmail.com
    EMAIL_PASS=your-app-password
-   EMAIL_FROM=RemixThis <noreply@remixthis.com>
+   EMAIL_FROM=wavshare <noreply@remixthis.com>
    ```
 
 6. **Start the development servers**

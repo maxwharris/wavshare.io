@@ -33,14 +33,14 @@ export const sendVerificationEmail = async (
   const mailOptions = {
     from: process.env.EMAIL_FROM,
     to: email,
-    subject: 'Verify your RemixThis account',
+    subject: 'Verify your wavshare account',
     html: `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Verify Your Email - RemixThis</title>
+          <title>Verify Your Email - wavshare</title>
           <style>
             body {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -88,12 +88,12 @@ export const sendVerificationEmail = async (
         </head>
         <body>
           <div class="header">
-            <div class="logo">RemixThis</div>
+            <div class="logo">wavshare</div>
             <p>Music Collaboration Platform</p>
           </div>
           
           <div class="content">
-            <h2>Welcome to RemixThis, ${username}!</h2>
+            <h2>Welcome to wavshare, ${username}!</h2>
             <p>Thank you for signing up! To start sharing and remixing music, please verify your email address by clicking the button below:</p>
             
             <div style="text-align: center;">
@@ -105,18 +105,18 @@ export const sendVerificationEmail = async (
             
             <p><strong>This link will expire in 24 hours.</strong></p>
             
-            <p>If you didn't create an account with RemixThis, you can safely ignore this email.</p>
+            <p>If you didn't create an account with wavshare, you can safely ignore this email.</p>
           </div>
           
           <div class="footer">
-            <p>© 2024 RemixThis. All rights reserved.</p>
+            <p>© 2024 wavshare. All rights reserved.</p>
             <p>This is an automated email, please do not reply.</p>
           </div>
         </body>
       </html>
     `,
     text: `
-      Welcome to RemixThis, ${username}!
+      Welcome to wavshare, ${username}!
       
       Thank you for signing up! To start sharing and remixing music, please verify your email address by visiting this link:
       
@@ -124,9 +124,9 @@ export const sendVerificationEmail = async (
       
       This link will expire in 24 hours.
       
-      If you didn't create an account with RemixThis, you can safely ignore this email.
+      If you didn't create an account with wavshare, you can safely ignore this email.
       
-      © 2024 RemixThis. All rights reserved.
+      © 2024 wavshare. All rights reserved.
     `,
   };
 
@@ -150,14 +150,14 @@ export const sendPasswordResetEmail = async (
   const mailOptions = {
     from: process.env.EMAIL_FROM,
     to: email,
-    subject: 'Reset your RemixThis password',
+    subject: 'Reset your wavshare password',
     html: `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Reset Password - RemixThis</title>
+          <title>Reset Password - wavshare</title>
           <style>
             body {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -205,7 +205,7 @@ export const sendPasswordResetEmail = async (
         </head>
         <body>
           <div class="header">
-            <div class="logo">RemixThis</div>
+            <div class="logo">wavshare</div>
             <p>Music Collaboration Platform</p>
           </div>
           
@@ -227,7 +227,7 @@ export const sendPasswordResetEmail = async (
           </div>
           
           <div class="footer">
-            <p>© 2024 RemixThis. All rights reserved.</p>
+            <p>© 2024 wavshare. All rights reserved.</p>
             <p>This is an automated email, please do not reply.</p>
           </div>
         </body>

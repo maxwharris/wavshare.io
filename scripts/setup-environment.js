@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Environment Setup Script for RemixThis
+ * Environment Setup Script for wavshare
  * 
  * This script helps set up environment configurations for different deployment scenarios.
  * Usage: node scripts/setup-environment.js [development|production]
@@ -21,7 +21,7 @@ function question(query) {
 }
 
 async function setupEnvironment() {
-  console.log('🚀 RemixThis Environment Setup\n');
+  console.log('🚀 wavshare Environment Setup\n');
   
   const environment = process.argv[2] || await question('Environment (development/production): ');
   
