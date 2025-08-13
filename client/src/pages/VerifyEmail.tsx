@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { API_ENDPOINTS } from '../config/api';
 
 const VerifyEmail: React.FC = () => {
   const { token } = useParams<{ token: string }>();
@@ -15,7 +16,7 @@ const VerifyEmail: React.FC = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:5000/api/auth/verify-email/${token}`, {
+        const response = await fetch(API_ENDPOINTS.VERIFY_EMAIL(token), {
           method: 'GET',
         });
 

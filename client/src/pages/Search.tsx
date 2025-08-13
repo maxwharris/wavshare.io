@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAudio } from '../contexts/AudioContext.tsx';
 import ProfileAvatar from '../components/ProfileAvatar.tsx';
+import { API_ENDPOINTS, buildServerUrl } from '../config/api';
 
 interface SearchResults {
   posts: Array<{
@@ -83,7 +84,7 @@ const Search: React.FC = () => {
         params.append('key', selectedKey);
       }
 
-      const response = await fetch(`http://localhost:5000/api/search?${params.toString()}`);
+      const response = await fetch(`${API_ENDPOINTS.SEARCH}?${params.toString()}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -109,7 +110,7 @@ const Search: React.FC = () => {
 
   const handlePlayAudio = (post: any) => {
     if (post.postType === 'AUDIO_FILE' && post.filePath) {
-      const audioUrl = `http://localhost:5000/${post.filePath}`;
+      const audioUrl = buildServerUrl(post.filePath);
       playTrack({
         id: post.id,
         title: post.title,
@@ -389,7 +390,7 @@ const Search: React.FC = () => {
                               <span>Play</span>
                             </button>
                             <a
-                              href={`http://localhost:5000/api/posts/${post.id}/download`}
+                              href={API_ENDPOINTS.POST_DOWNLOAD(post.id)}
                               className="flex items-center space-x-2 px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25"
                             >
                               <span>Download</span>

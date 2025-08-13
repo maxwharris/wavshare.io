@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAudio } from '../contexts/AudioContext.tsx';
 import ProfileAvatar from '../components/ProfileAvatar.tsx';
+import { API_ENDPOINTS, API_CONFIG } from '../config/api';
 
 interface Post {
   id: string;
@@ -120,7 +121,7 @@ const PostDetail: React.FC = () => {
 
       console.log('Fetching post with ID:', id);
       try {
-        const response = await fetch(`http://localhost:5000/api/posts/${id}`);
+        const response = await fetch(API_ENDPOINTS.POST_BY_ID(id));
         console.log('Response status:', response.status);
         const data = await response.json();
         console.log('Response data:', data);
@@ -160,13 +161,13 @@ const PostDetail: React.FC = () => {
   }, [id, user]);
 
   const handleVote = async (voteType: 'UPVOTE' | 'DOWNVOTE') => {
-    if (!user || !token) {
+    if (!user || !token || !id) {
       alert('Please log in to vote');
       return;
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/votes/${id}`, {
+      const response = await fetch(API_ENDPOINTS.VOTE(id), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -193,7 +194,7 @@ const PostDetail: React.FC = () => {
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !token) {
+    if (!user || !token || !id) {
       alert('Please log in to comment');
       return;
     }
@@ -212,7 +213,7 @@ const PostDetail: React.FC = () => {
         formData.append('audioFile', selectedAudioFile);
       }
 
-      const response = await fetch(`http://localhost:5000/api/comments/${id}`, {
+      const response = await fetch(API_ENDPOINTS.COMMENTS(id), {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`
@@ -269,7 +270,7 @@ const PostDetail: React.FC = () => {
 
   const handlePlayRemixComment = (comment: any) => {
     if (comment.filePath) {
-      const audioUrl = `http://localhost:5000/${comment.filePath}`;
+      const audioUrl = `${API_CONFIG.SERVER_URL}/${comment.filePath}`;
       playTrack({
         id: comment.id,
         title: `Remix by ${comment.user.username}`,
@@ -282,7 +283,7 @@ const PostDetail: React.FC = () => {
   };
 
   const handleDownloadRemixComment = (commentId: string) => {
-    window.open(`http://localhost:5000/api/comments/${commentId}/download`, '_blank');
+    window.open(API_ENDPOINTS.COMMENT_DOWNLOAD(commentId), '_blank');
   };
 
   const handleCommentVote = async (commentId: string, voteType: 'UPVOTE' | 'DOWNVOTE') => {
@@ -292,7 +293,7 @@ const PostDetail: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/comments/${commentId}/vote`, {
+      const response = await fetch(API_ENDPOINTS.COMMENT_VOTE(commentId), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -340,7 +341,7 @@ const PostDetail: React.FC = () => {
         formData.append('audioFile', replyAudioFile);
       }
 
-      const response = await fetch(`http://localhost:5000/api/comments/${replyingTo}/replies`, {
+      const response = await fetch(API_ENDPOINTS.COMMENT_REPLIES(replyingTo), {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`
@@ -432,7 +433,7 @@ const PostDetail: React.FC = () => {
 
   const handlePlayAudio = () => {
     if (post && post.postType === 'AUDIO_FILE' && post.filePath) {
-      const audioUrl = `http://localhost:5000/${post.filePath}`;
+      const audioUrl = `${API_CONFIG.SERVER_URL}/${post.filePath}`;
       playTrack({
         id: post.id,
         title: post.title,
@@ -446,7 +447,7 @@ const PostDetail: React.FC = () => {
 
   const handleDownload = () => {
     if (post && post.postType === 'AUDIO_FILE') {
-      window.open(`http://localhost:5000/api/posts/${post.id}/download`, '_blank');
+      window.open(API_ENDPOINTS.POST_DOWNLOAD(post.id), '_blank');
     }
   };
 
@@ -462,7 +463,7 @@ const PostDetail: React.FC = () => {
     setDeletingPost(true);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/posts/${post.id}`, {
+      const response = await fetch(API_ENDPOINTS.POST_BY_ID(post.id), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`
@@ -496,7 +497,7 @@ const PostDetail: React.FC = () => {
     setDeletingComment(commentId);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/comments/${commentId}`, {
+      const response = await fetch(API_ENDPOINTS.COMMENT_BY_ID(commentId), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`

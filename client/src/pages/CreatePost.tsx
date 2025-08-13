@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
+import { API_ENDPOINTS } from '../config/api';
 
 const CreatePost: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -124,7 +125,7 @@ const CreatePost: React.FC = () => {
         formDataToSend.append('tags', JSON.stringify(allTags));
       }
 
-      const response = await fetch('http://localhost:5000/api/posts', {
+      const response = await fetch(API_ENDPOINTS.POSTS, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

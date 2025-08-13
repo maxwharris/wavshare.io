@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAudio } from '../contexts/AudioContext.tsx';
 import ProfileAvatar from '../components/ProfileAvatar.tsx';
+import { API_ENDPOINTS, buildServerUrl } from '../config/api';
 
 interface Post {
   id: string;
@@ -50,7 +51,7 @@ const Home: React.FC = () => {
   const fetchPosts = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/posts?sortBy=${sortBy}`);
+      const response = await fetch(`${API_ENDPOINTS.POSTS}?sortBy=${sortBy}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -76,7 +77,7 @@ const Home: React.FC = () => {
 
   const handlePlayAudio = (post: Post) => {
     if (post.postType === 'AUDIO_FILE' && post.filePath) {
-      const audioUrl = `http://localhost:5000/${post.filePath}`;
+      const audioUrl = buildServerUrl(post.filePath);
       playTrack({
         id: post.id,
         title: post.title,
@@ -271,7 +272,7 @@ const Home: React.FC = () => {
                           <span>Play</span>
                         </button>
                         <a
-                          href={`http://localhost:5000/api/posts/${post.id}/download`}
+                          href={API_ENDPOINTS.POST_DOWNLOAD(post.id)}
                           className="flex items-center space-x-2 px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25"
                         >
                           <span>Download</span>

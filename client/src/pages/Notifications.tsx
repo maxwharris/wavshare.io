@@ -15,7 +15,7 @@ const Notifications: React.FC = () => {
 
   useEffect(() => {
     fetchNotifications();
-  }, []);
+  }, [fetchNotifications]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

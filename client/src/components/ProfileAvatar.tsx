@@ -1,4 +1,5 @@
 import React from 'react';
+import { buildServerUrl } from '../config/api';
 import { Link } from 'react-router-dom';
 
 interface ProfileAvatarProps {
@@ -29,7 +30,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
     <div className={`${sizeClasses[size]} rounded-full flex items-center justify-center font-semibold ${className}`}>
       {user.profilePhoto ? (
         <img
-          src={`http://localhost:5000/${user.profilePhoto}`}
+          src={buildServerUrl(user.profilePhoto)}
           alt={`${user.username}'s profile`}
           className={`${sizeClasses[size]} rounded-full object-cover border border-slate-600`}
         />

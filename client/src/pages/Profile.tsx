@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAudio } from '../contexts/AudioContext.tsx';
+import { API_ENDPOINTS, API_CONFIG } from '../config/api';
 
 interface UserProfile {
   id: string;
@@ -101,7 +102,7 @@ const Profile: React.FC = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:5000/api/users/profile/${userId}`);
+        const response = await fetch(API_ENDPOINTS.USER_PROFILE_BY_ID(userId));
         const data = await response.json();
 
         if (response.ok) {
@@ -165,7 +166,7 @@ const Profile: React.FC = () => {
     setUpdating(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/profile', {
+      const response = await fetch(API_ENDPOINTS.USER_PROFILE, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +197,7 @@ const Profile: React.FC = () => {
 
   const handlePlayAudio = (post: any) => {
     if (post.postType === 'AUDIO_FILE' && post.filePath) {
-      const audioUrl = `http://localhost:5000/${post.filePath}`;
+      const audioUrl = `${API_CONFIG.SERVER_URL}/${post.filePath}`;
       playTrack({
         id: post.id,
         title: post.title,
@@ -210,7 +211,7 @@ const Profile: React.FC = () => {
 
   const handlePlayRemix = (remix: any) => {
     if (remix.remixPost.filePath) {
-      const audioUrl = `http://localhost:5000/${remix.remixPost.filePath}`;
+      const audioUrl = `${API_CONFIG.SERVER_URL}/${remix.remixPost.filePath}`;
       playTrack({
         id: remix.remixPost.id,
         title: remix.remixPost.title,
@@ -244,7 +245,7 @@ const Profile: React.FC = () => {
       const formData = new FormData();
       formData.append('profilePhoto', file);
 
-      const response = await fetch('http://localhost:5000/api/users/profile/photo', {
+      const response = await fetch(API_ENDPOINTS.USER_PROFILE_PHOTO, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`
@@ -278,7 +279,7 @@ const Profile: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete your profile photo?')) return;
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/profile/photo', {
+      const response = await fetch(API_ENDPOINTS.USER_PROFILE_PHOTO, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`
@@ -342,7 +343,7 @@ const Profile: React.FC = () => {
             <div className="relative">
               {profile.profilePhoto ? (
                 <img
-                  src={`http://localhost:5000/${profile.profilePhoto}`}
+                  src={`${API_CONFIG.SERVER_URL}/${profile.profilePhoto}`}
                   alt={`${profile.username}'s profile`}
                   className="w-20 h-20 rounded-full object-cover border-2 border-slate-600"
                 />
@@ -591,7 +592,7 @@ const Profile: React.FC = () => {
                             <span>Play</span>
                           </button>
                           <a
-                            href={`http://localhost:5000/api/posts/${post.id}/download`}
+                            href={API_ENDPOINTS.POST_DOWNLOAD(post.id)}
                             className="flex items-center space-x-2 px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25"
                           >
                             <span>Download</span>

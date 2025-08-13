@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuth } from './AuthContext.tsx';
+import { API_ENDPOINTS } from '../config/api';
 
 interface Notification {
   id: string;
@@ -55,12 +56,12 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   const [loading, setLoading] = useState(false);
   const { user, token } = useAuth();
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     if (!user || !token) return;
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/notifications', {
+      const response = await fetch(API_ENDPOINTS.NOTIFICATIONS, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -76,13 +77,13 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, token]);
 
-  const fetchUnreadCount = async () => {
+  const fetchUnreadCount = useCallback(async () => {
     if (!user || !token) return;
 
     try {
-      const response = await fetch('http://localhost:5000/api/notifications/unread-count', {
+      const response = await fetch(API_ENDPOINTS.NOTIFICATIONS_UNREAD_COUNT, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -95,13 +96,13 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     } catch (error) {
       console.error('Fetch unread count error:', error);
     }
-  };
+  }, [user, token]);
 
   const markAsRead = async (notificationId: string) => {
     if (!user || !token) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
+      const response = await fetch(API_ENDPOINTS.NOTIFICATION_READ(notificationId), {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`
@@ -127,7 +128,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     if (!user || !token) return;
 
     try {
-      const response = await fetch('http://localhost:5000/api/notifications/read-all', {
+      const response = await fetch(API_ENDPOINTS.NOTIFICATIONS_READ_ALL, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`
@@ -149,7 +150,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     if (!user || !token) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}`, {
+      const response = await fetch(API_ENDPOINTS.NOTIFICATION_DELETE(notificationId), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`
@@ -176,7 +177,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       setNotifications([]);
       setUnreadCount(0);
     }
-  }, [user, token]);
+  }, [user, token, fetchNotifications]);
 
   // Poll for unread count every 30 seconds
   useEffect(() => {
@@ -184,7 +185,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
 
     const interval = setInterval(fetchUnreadCount, 30000);
     return () => clearInterval(interval);
-  }, [user, token]);
+  }, [user, token, fetchUnreadCount]);
 
   const value: NotificationContextType = {
     notifications,

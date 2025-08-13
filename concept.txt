@@ -14,3 +14,7 @@ I want to make a website where users can post self-made samples OR links to song
     
 3. Users should have profile pages with a custom username, profile photo, description, and a feed of their posts/replies.  DONE
     -Settings page where users can customize their profile. DONE
+
+
+To add:
+- Add liked posts to profile

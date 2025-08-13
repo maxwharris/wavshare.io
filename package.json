@@ -9,7 +9,16 @@
     "client:dev": "cd client && npm run dev",
     "install:all": "npm install && cd server && npm install && cd ../client && npm install",
     "build": "cd client && npm run build",
-    "start": "cd server && npm start"
+    "build:prod": "NODE_ENV=production cd client && npm run build",
+    "start": "cd server && npm start",
+    "start:prod": "NODE_ENV=production cd server && npm start",
+    "setup:env": "node scripts/setup-environment.js",
+    "setup:dev": "node scripts/setup-environment.js development",
+    "setup:prod": "node scripts/setup-environment.js production",
+    "migrate:dev": "cd server && npx prisma migrate dev",
+    "migrate:prod": "cd server && npx prisma migrate deploy",
+    "db:generate": "cd server && npx prisma generate",
+    "db:studio": "cd server && npx prisma studio"
   },
   "keywords": ["music", "remix", "collaboration", "audio", "sharing"],
   "author": "",
