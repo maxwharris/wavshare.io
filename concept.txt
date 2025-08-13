@@ -1,5 +1,7 @@
 I want to make a website where users can post self-made samples OR links to songs on Youtube, and other users can download and reply with their own remix.
 
+ The end product should be a combination of Soundcloud and WhoSampled. 
+
 1. Users will be able to make an account using their email. DONE
     -Require username, email, password. DONE
     -Require email verification before allowing users to post/reply.
