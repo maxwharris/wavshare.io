@@ -34,8 +34,10 @@ const fileFilter = (req: any, file: any, cb: any) => {
 
 export const upload = multer({
   storage: storage,
-  fileFilter: fileFilter
-  // No file size limits - allows files of any size
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 250 * 1024 * 1024 // 250MB limit
+  }
 });
 
 // @desc    Get all posts

@@ -35,8 +35,10 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCa
 
 export const upload = multer({
   storage,
-  fileFilter
-  // No file size limits - allows files of any size
+  fileFilter,
+  limits: {
+    fileSize: 250 * 1024 * 1024 // 250MB limit
+  }
 });
 
 // @desc    Get comments for a post (hierarchical with replies)
@@ -296,15 +298,22 @@ export const updateComment = async (req: AuthRequest, res: Response): Promise<vo
 
 // @desc    Delete a comment
 // @route   DELETE /api/comments/:id
-// @access  Private (only comment owner)
+// @access  Private (comment owner or post owner)
 export const deleteComment = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const userId = req.user!.id;
 
-    // Check if comment exists and user owns it
+    // Check if comment exists and get post info
     const existingComment = await prisma.comment.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        post: {
+          select: {
+            userId: true
+          }
+        }
+      }
     });
 
     if (!existingComment) {
@@ -312,12 +321,18 @@ export const deleteComment = async (req: AuthRequest, res: Response): Promise<vo
       return;
     }
 
-    if (existingComment.userId !== userId) {
+    // Allow deletion if user is comment owner OR post owner
+    if (existingComment.userId !== userId && existingComment.post.userId !== userId) {
       res.status(403).json({ message: 'Not authorized to delete this comment' });
       return;
     }
 
-    // Delete the comment
+    // Delete associated audio file if it exists
+    if (existingComment.filePath && fs.existsSync(path.join(__dirname, '../../', existingComment.filePath))) {
+      fs.unlinkSync(path.join(__dirname, '../../', existingComment.filePath));
+    }
+
+    // Delete the comment (cascade will handle related records like votes and replies)
     await prisma.comment.delete({
       where: { id }
     });

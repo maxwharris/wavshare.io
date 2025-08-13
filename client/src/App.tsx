@@ -10,6 +10,7 @@ import Register from './pages/Register.tsx';
 import Profile from './pages/Profile.tsx';
 import CreatePost from './pages/CreatePost.tsx';
 import PostDetail from './pages/PostDetail.tsx';
+import Search from './pages/Search.tsx';
 import Notifications from './pages/Notifications.tsx';
 import VerifyEmail from './pages/VerifyEmail.tsx';
 import AudioPlayer from './components/AudioPlayer.tsx';
@@ -32,6 +33,7 @@ function App() {
                   <Route path="/profile/:userId" element={<Profile />} />
                   <Route path="/create" element={<CreatePost />} />
                   <Route path="/post/:postId" element={<PostDetail />} />
+                  <Route path="/search" element={<Search />} />
                   <Route path="/notifications" element={<Notifications />} />
                 </Routes>
               </main>

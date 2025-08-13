@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAudio } from '../contexts/AudioContext.tsx';
 import ProfileAvatar from '../components/ProfileAvatar.tsx';
@@ -103,9 +103,12 @@ const PostDetail: React.FC = () => {
   const [replyAudioFile, setReplyAudioFile] = useState<File | null>(null);
   const [submittingReply, setSubmittingReply] = useState(false);
   const [commentVotes, setCommentVotes] = useState<{[key: string]: VoteStatus}>({});
+  const [deletingPost, setDeletingPost] = useState(false);
+  const [deletingComment, setDeletingComment] = useState<string | null>(null);
 
   const { user, token } = useAuth();
   const { playTrack } = useAudio();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -246,12 +249,21 @@ const PostDetail: React.FC = () => {
     const file = e.target.files?.[0];
     if (file) {
       // Check if it's an audio file
-      if (file.type.startsWith('audio/')) {
-        setSelectedAudioFile(file);
-      } else {
+      if (!file.type.startsWith('audio/')) {
         alert('Please select an audio file (MP3, WAV, etc.)');
         e.target.value = '';
+        return;
       }
+      
+      // Check file size (250MB limit)
+      const maxSize = 250 * 1024 * 1024; // 250MB in bytes
+      if (file.size > maxSize) {
+        alert('File size must be less than 250MB. Please select a smaller file.');
+        e.target.value = '';
+        return;
+      }
+      
+      setSelectedAudioFile(file);
     }
   };
 
@@ -263,7 +275,8 @@ const PostDetail: React.FC = () => {
         title: `Remix by ${comment.user.username}`,
         artist: comment.user.username,
         url: audioUrl,
-        postId: post?.id || ''
+        postId: post?.id || '',
+        userId: comment.user.id
       });
     }
   };
@@ -349,7 +362,7 @@ const PostDetail: React.FC = () => {
                 replies: [...(comment.replies || []), data],
                 _count: {
                   ...comment._count,
-                  replies: comment._count.replies + 1
+                  replies: (comment._count?.replies || 0) + 1
                 }
               };
             }
@@ -383,12 +396,21 @@ const PostDetail: React.FC = () => {
   const handleReplyFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.type.startsWith('audio/')) {
-        setReplyAudioFile(file);
-      } else {
+      if (!file.type.startsWith('audio/')) {
         alert('Please select an audio file (MP3, WAV, etc.)');
         e.target.value = '';
+        return;
       }
+      
+      // Check file size (250MB limit)
+      const maxSize = 250 * 1024 * 1024; // 250MB in bytes
+      if (file.size > maxSize) {
+        alert('File size must be less than 250MB. Please select a smaller file.');
+        e.target.value = '';
+        return;
+      }
+      
+      setReplyAudioFile(file);
     }
   };
 
@@ -416,7 +438,8 @@ const PostDetail: React.FC = () => {
         title: post.title,
         artist: post.user.username,
         url: audioUrl,
-        postId: post.id
+        postId: post.id,
+        userId: post.user.id
       });
     }
   };
@@ -424,6 +447,87 @@ const PostDetail: React.FC = () => {
   const handleDownload = () => {
     if (post && post.postType === 'AUDIO_FILE') {
       window.open(`http://localhost:5000/api/posts/${post.id}/download`, '_blank');
+    }
+  };
+
+  const handleDeletePost = async () => {
+    if (!user || !token || !post) {
+      return;
+    }
+
+    if (!window.confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+      return;
+    }
+
+    setDeletingPost(true);
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/posts/${post.id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        // Redirect to home page after successful deletion
+        navigate('/');
+      } else {
+        const data = await response.json();
+        alert(data.message || 'Failed to delete post');
+      }
+    } catch (error) {
+      console.error('Delete post error:', error);
+      alert('Network error. Please try again.');
+    } finally {
+      setDeletingPost(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!user || !token) {
+      return;
+    }
+
+    if (!window.confirm('Are you sure you want to delete this comment? This action cannot be undone.')) {
+      return;
+    }
+
+    setDeletingComment(commentId);
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        // Remove the comment from the post
+        setPost(prev => {
+          if (!prev) return null;
+          
+          const updatedComments = prev.comments.filter(comment => comment.id !== commentId);
+          
+          return {
+            ...prev,
+            comments: updatedComments,
+            _count: {
+              ...prev._count,
+              comments: prev._count.comments - 1
+            }
+          };
+        });
+      } else {
+        const data = await response.json();
+        alert(data.message || 'Failed to delete comment');
+      }
+    } catch (error) {
+      console.error('Delete comment error:', error);
+      alert('Network error. Please try again.');
+    } finally {
+      setDeletingComment(null);
     }
   };
 
@@ -489,18 +593,40 @@ const PostDetail: React.FC = () => {
           <p className="text-secondary mb-6">{post.description}</p>
         )}
 
-        {post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-6">
-            {post.tags.map((tag) => (
-              <span 
-                key={tag.id}
-                className="tag"
-              >
-                #{tag.name}
-              </span>
-            ))}
+        {/* Tags, BPM, and Key */}
+        <div className="mb-6">
+          {/* Regular Tags */}
+          {post.tags.filter(tag => !tag.name.startsWith('bpm:') && !tag.name.startsWith('key:')).length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {post.tags
+                .filter(tag => !tag.name.startsWith('bpm:') && !tag.name.startsWith('key:'))
+                .map((tag) => (
+                  <span 
+                    key={tag.id}
+                    className="tag"
+                  >
+                    #{tag.name}
+                  </span>
+                ))}
+            </div>
+          )}
+          
+          {/* BPM and Key Info */}
+          <div className="flex flex-wrap gap-4 text-sm">
+            {post.tags.find(tag => tag.name.startsWith('bpm:')) && (
+              <div className="flex items-center space-x-1 px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full border border-blue-500/30">
+                <span className="font-semibold">BPM:</span>
+                <span>{post.tags.find(tag => tag.name.startsWith('bpm:'))?.name.replace('bpm:', '')}</span>
+              </div>
+            )}
+            {post.tags.find(tag => tag.name.startsWith('key:')) && (
+              <div className="flex items-center space-x-1 px-3 py-1 bg-purple-600/20 text-purple-300 rounded-full border border-purple-500/30">
+                <span className="font-semibold">Key:</span>
+                <span>{post.tags.find(tag => tag.name.startsWith('key:'))?.name.replace('key:', '')}</span>
+              </div>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Audio Controls */}
         <div className="flex items-center justify-between mb-6">
@@ -511,14 +637,12 @@ const PostDetail: React.FC = () => {
                   onClick={handlePlayAudio}
                   className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  <span>▶️</span>
                   <span>Play</span>
                 </button>
                 <button
                   onClick={handleDownload}
                   className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
-                  <span>⬇️</span>
                   <span>Download</span>
                 </button>
               </>
@@ -535,6 +659,18 @@ const PostDetail: React.FC = () => {
               </a>
             )}
           </div>
+          
+          {/* Delete Post Button - Only show if user is post author */}
+          {user && user.id === post.user.id && (
+            <button
+              onClick={handleDeletePost}
+              disabled={deletingPost}
+              className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50"
+            >
+              <span>🗑️</span>
+              <span>{deletingPost ? 'Deleting...' : 'Delete Post'}</span>
+            </button>
+          )}
         </div>
 
         {/* Voting */}
@@ -687,14 +823,12 @@ const PostDetail: React.FC = () => {
                             onClick={() => handlePlayRemixComment(comment)}
                             className="flex items-center space-x-1 px-3 py-1 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors"
                           >
-                            <span>▶️</span>
                             <span>Play Remix</span>
                           </button>
                           <button
                             onClick={() => handleDownloadRemixComment(comment.id)}
                             className="flex items-center space-x-1 px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
                           >
-                            <span>⬇️</span>
                             <span>Download</span>
                           </button>
                         </div>
@@ -737,6 +871,17 @@ const PostDetail: React.FC = () => {
                             className="text-muted hover:text-accent transition-colors"
                           >
                             💬 Reply ({comment._count?.replies || 0})
+                          </button>
+                        )}
+
+                        {/* Delete Comment Button - Show if user is comment author or post author */}
+                        {user && (user.id === comment.user.id || user.id === post.user.id) && (
+                          <button
+                            onClick={() => handleDeleteComment(comment.id)}
+                            disabled={deletingComment === comment.id}
+                            className="text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+                          >
+                            {deletingComment === comment.id ? '🗑️ Deleting...' : '🗑️ Delete'}
                           </button>
                         )}
                       </div>
@@ -855,14 +1000,12 @@ const PostDetail: React.FC = () => {
                                     onClick={() => handlePlayRemixComment(reply)}
                                     className="flex items-center space-x-1 px-2 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 transition-colors"
                                   >
-                                    <span>▶️</span>
                                     <span>Play</span>
                                   </button>
                                   <button
                                     onClick={() => handleDownloadRemixComment(reply.id)}
                                     className="flex items-center space-x-1 px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
                                   >
-                                    <span>⬇️</span>
                                     <span>Download</span>
                                   </button>
                                 </div>
@@ -894,6 +1037,17 @@ const PostDetail: React.FC = () => {
                                   <span>👎</span>
                                   <span>{replyVoteStatus.voteCounts.downvotes}</span>
                                 </button>
+
+                                {/* Delete Reply Button - Show if user is reply author or post author */}
+                                {user && (user.id === reply.user.id || user.id === post.user.id) && (
+                                  <button
+                                    onClick={() => handleDeleteComment(reply.id)}
+                                    disabled={deletingComment === reply.id}
+                                    className="text-red-400 hover:text-red-300 transition-colors disabled:opacity-50 text-xs"
+                                  >
+                                    {deletingComment === reply.id ? '🗑️ Deleting...' : '🗑️ Delete'}
+                                  </button>
+                                )}
                               </div>
                             </div>
                           </div>

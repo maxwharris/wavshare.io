@@ -82,7 +82,8 @@ const Home: React.FC = () => {
         title: post.title,
         artist: post.user.username,
         url: audioUrl,
-        postId: post.id
+        postId: post.id,
+        userId: post.user.id
       });
     }
   };

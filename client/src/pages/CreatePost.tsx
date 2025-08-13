@@ -8,7 +8,9 @@ const CreatePost: React.FC = () => {
     description: '',
     postType: 'AUDIO_FILE',
     youtubeUrl: '',
-    tags: ''
+    tags: '',
+    bpm: '',
+    key: ''
   });
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
@@ -43,9 +45,9 @@ const CreatePost: React.FC = () => {
         setErrors(['Please select a valid audio file']);
         return;
       }
-      // Validate file size (50MB limit)
-      if (file.size > 50 * 1024 * 1024) {
-        setErrors(['File size must be less than 50MB']);
+      // Validate file size (250MB limit)
+      if (file.size > 250 * 1024 * 1024) {
+        setErrors(['File size must be less than 250MB']);
         return;
       }
       setAudioFile(file);
@@ -101,10 +103,25 @@ const CreatePost: React.FC = () => {
         formDataToSend.append('audioFile', audioFile);
       }
 
-      // Handle tags
+      // Handle tags, BPM, and Key
+      const allTags: string[] = [];
       if (formData.tags.trim()) {
         const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-        formDataToSend.append('tags', JSON.stringify(tagsArray));
+        allTags.push(...tagsArray);
+      }
+      
+      // Add BPM as a special tag if provided
+      if (formData.bpm.trim()) {
+        allTags.push(`bpm:${formData.bpm}`);
+      }
+      
+      // Add Key as a special tag if provided
+      if (formData.key.trim()) {
+        allTags.push(`key:${formData.key}`);
+      }
+      
+      if (allTags.length > 0) {
+        formDataToSend.append('tags', JSON.stringify(allTags));
       }
 
       const response = await fetch('http://localhost:5000/api/posts', {
@@ -225,7 +242,7 @@ const CreatePost: React.FC = () => {
                 required
               />
               <p className="text-sm text-gray-500 mt-1">
-                Supported formats: MP3, WAV, FLAC, etc. Max size: 50MB
+                Supported formats: MP3, WAV, FLAC, etc. Max size: 250MB
               </p>
               {audioFile && (
                 <p className="text-sm text-green-600 mt-1">
@@ -273,6 +290,82 @@ const CreatePost: React.FC = () => {
             <p className="text-sm text-gray-500 mt-1">
               Add tags to help others discover your post. Separate multiple tags with commas.
             </p>
+          </div>
+
+          {/* BPM and Key */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* BPM */}
+            <div>
+              <label htmlFor="bpm" className="block text-sm font-medium text-gray-700 mb-1">
+                BPM (Beats Per Minute)
+              </label>
+              <input
+                type="number"
+                id="bpm"
+                name="bpm"
+                value={formData.bpm}
+                onChange={handleChange}
+                className="form-input"
+                placeholder="120"
+                min="60"
+                max="200"
+                disabled={isLoading}
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Optional: Enter the tempo (60-200 BPM)
+              </p>
+            </div>
+
+            {/* Key */}
+            <div>
+              <label htmlFor="key" className="block text-sm font-medium text-gray-700 mb-1">
+                Musical Key
+              </label>
+              <select
+                id="key"
+                name="key"
+                value={formData.key}
+                onChange={handleChange}
+                className="form-input"
+                disabled={isLoading}
+              >
+                <option value="">Select Key (Optional)</option>
+                <option value="C">C Major</option>
+                <option value="C#">C# Major</option>
+                <option value="Db">Db Major</option>
+                <option value="D">D Major</option>
+                <option value="D#">D# Major</option>
+                <option value="Eb">Eb Major</option>
+                <option value="E">E Major</option>
+                <option value="F">F Major</option>
+                <option value="F#">F# Major</option>
+                <option value="Gb">Gb Major</option>
+                <option value="G">G Major</option>
+                <option value="G#">G# Major</option>
+                <option value="Ab">Ab Major</option>
+                <option value="A">A Major</option>
+                <option value="A#">A# Major</option>
+                <option value="Bb">Bb Major</option>
+                <option value="B">B Major</option>
+                <option value="Cm">C Minor</option>
+                <option value="C#m">C# Minor</option>
+                <option value="Dm">D Minor</option>
+                <option value="D#m">D# Minor</option>
+                <option value="Ebm">Eb Minor</option>
+                <option value="Em">E Minor</option>
+                <option value="Fm">F Minor</option>
+                <option value="F#m">F# Minor</option>
+                <option value="Gm">G Minor</option>
+                <option value="G#m">G# Minor</option>
+                <option value="Am">A Minor</option>
+                <option value="A#m">A# Minor</option>
+                <option value="Bbm">Bb Minor</option>
+                <option value="Bm">B Minor</option>
+              </select>
+              <p className="text-sm text-gray-500 mt-1">
+                Optional: Select the musical key
+              </p>
+            </div>
           </div>
 
           {/* Submit Button */}

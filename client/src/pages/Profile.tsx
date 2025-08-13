@@ -202,7 +202,8 @@ const Profile: React.FC = () => {
         title: post.title,
         artist: profile?.username || 'Unknown',
         url: audioUrl,
-        postId: post.id
+        postId: post.id,
+        userId: profile?.id || ''
       });
     }
   };
@@ -215,7 +216,8 @@ const Profile: React.FC = () => {
         title: remix.remixPost.title,
         artist: profile?.username || 'Unknown',
         url: audioUrl,
-        postId: remix.remixPost.id
+        postId: remix.remixPost.id,
+        userId: profile?.id || ''
       });
     }
   };

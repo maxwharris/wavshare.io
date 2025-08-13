@@ -7,6 +7,7 @@ interface AudioTrack {
   url: string;
   duration?: number;
   postId: string;
+  userId: string;
 }
 
 interface AudioContextType {

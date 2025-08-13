@@ -19,6 +19,9 @@ const Navbar: React.FC = () => {
             <Link to="/" className="nav-link">
               Home
             </Link>
+            <Link to="/search" className="nav-link">
+              Search
+            </Link>
             
             {user ? (
               <>

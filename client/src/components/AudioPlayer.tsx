@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAudio } from '../contexts/AudioContext.tsx';
 
 const AudioPlayer: React.FC = () => {
@@ -46,12 +47,18 @@ const AudioPlayer: React.FC = () => {
 
           {/* Track Info */}
           <div className="flex-1 min-w-0 text-left">
-            <div className="text-sm font-medium text-primary truncate text-left">
+            <Link 
+              to={`/post/${currentTrack.postId}`}
+              className="text-sm font-medium text-primary truncate text-left hover:text-accent transition-colors block"
+            >
               {currentTrack.title}
-            </div>
-            <div className="text-sm text-secondary truncate text-left">
+            </Link>
+            <Link 
+              to={`/profile/${currentTrack.userId}`}
+              className="text-sm text-secondary truncate text-left hover:text-primary transition-colors block"
+            >
               {currentTrack.artist}
-            </div>
+            </Link>
           </div>
 
           {/* Progress Bar */}
