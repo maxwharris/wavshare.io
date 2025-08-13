@@ -14,6 +14,7 @@ interface QueueContextType {
   // Actions
   loadQueue: () => Promise<void>;
   addToQueue: (postId: string) => Promise<{ message: string; queueItem: QueueItem }>;
+  addToQueueNext: (postId: string) => Promise<{ message: string; queueItem: QueueItem }>;
   removeFromQueue: (postId: string) => Promise<void>;
   reorderQueue: (fromIndex: number, toIndex: number) => Promise<void>;
   clearQueue: () => Promise<void>;
@@ -96,6 +97,35 @@ export const QueueProvider: React.FC<QueueProviderProps> = ({ children }) => {
       const errorMessage = err instanceof Error ? err.message : 'Failed to add to queue';
       setError(errorMessage);
       console.error('Add to queue error:', err);
+      throw new Error(errorMessage);
+    }
+  }, [user]);
+
+  // Add track to front of queue (play next)
+  const addToQueueNext = useCallback(async (postId: string) => {
+    if (!user) {
+      throw new Error('Must be logged in to add to queue');
+    }
+
+    setError(null);
+
+    try {
+      console.log('Adding to queue next:', postId);
+      const response = await queueService.addToQueueNext(postId);
+      console.log('Add to queue next response:', response);
+      
+      setQueue(prev => {
+        const newQueue = [response.queueItem, ...prev];
+        console.log('Queue state updated. Old length:', prev.length, 'New length:', newQueue.length);
+        console.log('New queue:', newQueue);
+        return newQueue;
+      });
+      
+      return response;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to add to queue next';
+      setError(errorMessage);
+      console.error('Add to queue next error:', err);
       throw new Error(errorMessage);
     }
   }, [user]);
@@ -249,6 +279,7 @@ export const QueueProvider: React.FC<QueueProviderProps> = ({ children }) => {
     // Actions
     loadQueue,
     addToQueue,
+    addToQueueNext,
     removeFromQueue,
     reorderQueue,
     clearQueue,

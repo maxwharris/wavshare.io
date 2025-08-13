@@ -48,10 +48,8 @@ router.get('/', async (req, res): Promise<void> => {
           {
             tags: {
               some: {
-                tag: {
-                  name: {
-                    contains: searchQuery
-                  }
+                name: {
+                  contains: searchQuery
                 }
               }
             }
@@ -65,9 +63,7 @@ router.get('/', async (req, res): Promise<void> => {
       andConditions.push({
         tags: {
           some: {
-            tag: {
-              name: `key:${keyFilter}`
-            }
+            name: `key:${keyFilter}`
           }
         }
       });

@@ -76,6 +76,21 @@ class QueueService {
     return response.json();
   }
 
+  async addToQueueNext(postId: string): Promise<{ message: string; queueItem: QueueItem }> {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/queue/next`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ postId })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to add to queue next');
+    }
+
+    return response.json();
+  }
+
   async removeFromQueue(postId: string): Promise<{ message: string }> {
     const response = await fetch(`${API_CONFIG.BASE_URL}/queue/${postId}`, {
       method: 'DELETE',

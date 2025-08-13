@@ -36,7 +36,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
         />
       ) : (
         <div className={`${sizeClasses[size]} bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold border border-slate-600`}>
-          {user.username.charAt(0).toUpperCase()}
+          {user.username ? user.username.charAt(0).toUpperCase() : '?'}
         </div>
       )}
     </div>

@@ -146,6 +146,104 @@ export const addToQueue = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// Add track to front of queue (play next)
+export const addToQueueNext = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: 'Authentication required' });
+      return;
+    }
+
+    const { postId } = req.body;
+    if (!postId) {
+      res.status(400).json({ message: 'Post ID is required' });
+      return;
+    }
+
+    // Check if post exists and is audio
+    const post = await prisma.post.findUnique({
+      where: { id: postId }
+    });
+
+    if (!post) {
+      res.status(404).json({ message: 'Post not found' });
+      return;
+    }
+
+    if (post.postType !== 'AUDIO_FILE' || !post.filePath) {
+      res.status(400).json({ message: 'Only audio posts can be added to queue' });
+      return;
+    }
+
+    // Check if already in queue
+    const existingItem = await prisma.userQueue.findUnique({
+      where: {
+        userId_postId: {
+          userId,
+          postId
+        }
+      }
+    });
+
+    if (existingItem) {
+      res.status(400).json({ message: 'Track already in queue' });
+      return;
+    }
+
+    // Check queue size limit (100 tracks)
+    const queueCount = await prisma.userQueue.count({
+      where: { userId }
+    });
+
+    if (queueCount >= 100) {
+      res.status(400).json({ message: 'Queue is full (maximum 100 tracks)' });
+      return;
+    }
+
+    // Shift all existing items down by 1 position
+    await prisma.userQueue.updateMany({
+      where: { userId },
+      data: {
+        position: {
+          increment: 1
+        }
+      }
+    });
+
+    // Add to front of queue (position 0)
+    const queueItem = await prisma.userQueue.create({
+      data: {
+        userId,
+        postId,
+        position: 0
+      },
+      include: {
+        post: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                profilePhoto: true
+              }
+            },
+            tags: true
+          }
+        }
+      }
+    });
+
+    res.status(201).json({
+      message: 'Track added to front of queue',
+      queueItem
+    });
+  } catch (error) {
+    console.error('Add to queue next error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 // Remove track from queue
 export const removeFromQueue = async (req: AuthRequest, res: Response) => {
   try {

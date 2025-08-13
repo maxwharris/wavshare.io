@@ -49,7 +49,7 @@ const Home: React.FC = () => {
 
   const { user } = useAuth();
   const { playTrack } = useAudio();
-  const { addToQueue, isInQueue } = useQueue();
+  const { addToQueue, addToQueueNext, isInQueue } = useQueue();
 
   const fetchPosts = useCallback(async () => {
     setLoading(true);
@@ -301,24 +301,44 @@ const Home: React.FC = () => {
                           <span>Download</span>
                         </a>
                         {user && (
-                          <button
-                            onClick={async () => {
-                              try {
-                        await addToQueue(post.id);
-                      } catch (error) {
-                                alert(error instanceof Error ? error.message : 'Failed to add to queue');
-                              }
-                            }}
-                            disabled={isInQueue(post.id)}
-                            className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                              isInQueue(post.id)
-                                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                : 'bg-purple-600 hover:bg-purple-500 text-white hover:shadow-lg hover:shadow-purple-500/25'
-                            }`}
-                          >
-                            <span>📋</span>
-                            <span>{isInQueue(post.id) ? 'In Queue' : 'Add to Queue'}</span>
-                          </button>
+                          <>
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await addToQueueNext(post.id);
+                                } catch (error) {
+                                  alert(error instanceof Error ? error.message : 'Failed to add to queue next');
+                                }
+                              }}
+                              disabled={isInQueue(post.id)}
+                              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                                isInQueue(post.id)
+                                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                  : 'bg-orange-600 hover:bg-orange-500 text-white hover:shadow-lg hover:shadow-orange-500/25'
+                              }`}
+                            >
+                              <span>⏭️</span>
+                              <span>{isInQueue(post.id) ? 'In Queue' : 'Play Next'}</span>
+                            </button>
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await addToQueue(post.id);
+                                } catch (error) {
+                                  alert(error instanceof Error ? error.message : 'Failed to add to queue');
+                                }
+                              }}
+                              disabled={isInQueue(post.id)}
+                              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                                isInQueue(post.id)
+                                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                  : 'bg-purple-600 hover:bg-purple-500 text-white hover:shadow-lg hover:shadow-purple-500/25'
+                              }`}
+                            >
+                              <span>📋</span>
+                              <span>{isInQueue(post.id) ? 'In Queue' : 'Add to Queue'}</span>
+                            </button>
+                          </>
                         )}
                       </>
                     )}

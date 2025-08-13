@@ -3,6 +3,7 @@ import { auth } from '../middleware/auth';
 import {
   getUserQueue,
   addToQueue,
+  addToQueueNext,
   removeFromQueue,
   reorderQueue,
   clearQueue,
@@ -18,6 +19,7 @@ router.use(auth);
 // Queue management routes
 router.get('/', getUserQueue);
 router.post('/', addToQueue);
+router.post('/next', addToQueueNext);
 router.delete('/:postId', removeFromQueue);
 router.put('/reorder', reorderQueue);
 router.delete('/', clearQueue);

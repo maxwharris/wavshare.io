@@ -111,7 +111,7 @@ const PostDetail: React.FC = () => {
 
   const { user, token } = useAuth();
   const { playTrack } = useAudio();
-  const { addToQueue, isInQueue } = useQueue();
+  const { addToQueue, addToQueueNext, isInQueue } = useQueue();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -681,24 +681,44 @@ const PostDetail: React.FC = () => {
                   <span>Download</span>
                 </button>
                 {user && (
-                  <button
-                    onClick={async () => {
-                      try {
-                        await addToQueue(post.id);
-                      } catch (error) {
-                        alert(error instanceof Error ? error.message : 'Failed to add to queue');
-                      }
-                    }}
-                    disabled={isInQueue(post.id)}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                      isInQueue(post.id)
-                        ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                        : 'bg-purple-600 text-white hover:bg-purple-700'
-                    }`}
-                  >
-                    <span>📋</span>
-                    <span>{isInQueue(post.id) ? 'In Queue' : 'Add to Queue'}</span>
-                  </button>
+                  <>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await addToQueueNext(post.id);
+                        } catch (error) {
+                          alert(error instanceof Error ? error.message : 'Failed to add to queue next');
+                        }
+                      }}
+                      disabled={isInQueue(post.id)}
+                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                        isInQueue(post.id)
+                          ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                          : 'bg-orange-600 text-white hover:bg-orange-700'
+                      }`}
+                    >
+                      <span>⏭️</span>
+                      <span>{isInQueue(post.id) ? 'In Queue' : 'Play Next'}</span>
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await addToQueue(post.id);
+                        } catch (error) {
+                          alert(error instanceof Error ? error.message : 'Failed to add to queue');
+                        }
+                      }}
+                      disabled={isInQueue(post.id)}
+                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                        isInQueue(post.id)
+                          ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                          : 'bg-purple-600 text-white hover:bg-purple-700'
+                      }`}
+                    >
+                      <span>📋</span>
+                      <span>{isInQueue(post.id) ? 'In Queue' : 'Add to Queue'}</span>
+                    </button>
+                  </>
                 )}
               </>
             )}

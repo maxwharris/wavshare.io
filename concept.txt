@@ -19,9 +19,8 @@ I want to make a website where users can post self-made samples OR links to song
 
 
 To add: 
-- Queue
-	- Add option to add to queue or play next on Post Detail and posts across all pages. 
-	- Implement before implementing Playlists.    
+- Add play next button on Post Detail and posts across all pages. 
+   
 - Playlists
 	- Display on profile. 
 	- Include in search. 
@@ -34,3 +33,4 @@ To add:
 Existing Issues:
 - Logs out when deleting comment
 - Fast forward and rewind button functionality
+- Search broken

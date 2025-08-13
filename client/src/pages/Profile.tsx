@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAudio } from '../contexts/AudioContext.tsx';
+import { useQueue } from '../contexts/QueueContext.tsx';
 import ProfileAvatar from '../components/ProfileAvatar.tsx';
 import { API_ENDPOINTS, API_CONFIG } from '../config/api';
 
@@ -94,6 +95,7 @@ const Profile: React.FC = () => {
 
   const { user, token } = useAuth();
   const { playTrack } = useAudio();
+  const { addToQueue, addToQueueNext, isInQueue } = useQueue();
 
   const isOwnProfile = user && userId === user.id;
 
@@ -648,14 +650,56 @@ const Profile: React.FC = () => {
                             onClick={() => handlePlayAudio(post)}
                             className="btn-primary hover-glow flex items-center space-x-2"
                           >
+                            <span>▶️</span>
                             <span>Play</span>
                           </button>
                           <a
                             href={API_ENDPOINTS.POST_DOWNLOAD(post.id)}
                             className="flex items-center space-x-2 px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25"
                           >
+                            <span>⬇️</span>
                             <span>Download</span>
                           </a>
+                          {user && (
+                            <>
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    await addToQueueNext(post.id);
+                                  } catch (error) {
+                                    alert(error instanceof Error ? error.message : 'Failed to add to queue next');
+                                  }
+                                }}
+                                disabled={isInQueue(post.id)}
+                                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                                  isInQueue(post.id)
+                                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                    : 'bg-orange-600 hover:bg-orange-500 text-white hover:shadow-lg hover:shadow-orange-500/25'
+                                }`}
+                              >
+                                <span>⏭️</span>
+                                <span>{isInQueue(post.id) ? 'In Queue' : 'Play Next'}</span>
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    await addToQueue(post.id);
+                                  } catch (error) {
+                                    alert(error instanceof Error ? error.message : 'Failed to add to queue');
+                                  }
+                                }}
+                                disabled={isInQueue(post.id)}
+                                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                                  isInQueue(post.id)
+                                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                    : 'bg-purple-600 hover:bg-purple-500 text-white hover:shadow-lg hover:shadow-purple-500/25'
+                                }`}
+                              >
+                                <span>📋</span>
+                                <span>{isInQueue(post.id) ? 'In Queue' : 'Add to Queue'}</span>
+                              </button>
+                            </>
+                          )}
                         </>
                       )}
                       {post.postType === 'YOUTUBE_LINK' && (
@@ -665,6 +709,7 @@ const Profile: React.FC = () => {
                           rel="noopener noreferrer"
                           className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-red-500/25"
                         >
+                          <span>📺</span>
                           <span>Watch on YouTube</span>
                         </a>
                       )}
@@ -868,14 +913,56 @@ const Profile: React.FC = () => {
                               onClick={() => handlePlayAudio(post)}
                               className="btn-primary hover-glow flex items-center space-x-2"
                             >
+                              <span>▶️</span>
                               <span>Play</span>
                             </button>
                             <a
                               href={API_ENDPOINTS.POST_DOWNLOAD(post.id)}
                               className="flex items-center space-x-2 px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25"
                             >
+                              <span>⬇️</span>
                               <span>Download</span>
                             </a>
+                            {user && (
+                              <>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await addToQueueNext(post.id);
+                                    } catch (error) {
+                                      alert(error instanceof Error ? error.message : 'Failed to add to queue next');
+                                    }
+                                  }}
+                                  disabled={isInQueue(post.id)}
+                                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                                    isInQueue(post.id)
+                                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                      : 'bg-orange-600 hover:bg-orange-500 text-white hover:shadow-lg hover:shadow-orange-500/25'
+                                  }`}
+                                >
+                                  <span>⏭️</span>
+                                  <span>{isInQueue(post.id) ? 'In Queue' : 'Play Next'}</span>
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await addToQueue(post.id);
+                                    } catch (error) {
+                                      alert(error instanceof Error ? error.message : 'Failed to add to queue');
+                                    }
+                                  }}
+                                  disabled={isInQueue(post.id)}
+                                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                                    isInQueue(post.id)
+                                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                      : 'bg-purple-600 hover:bg-purple-500 text-white hover:shadow-lg hover:shadow-purple-500/25'
+                                  }`}
+                                >
+                                  <span>📋</span>
+                                  <span>{isInQueue(post.id) ? 'In Queue' : 'Add to Queue'}</span>
+                                </button>
+                              </>
+                            )}
                           </>
                         )}
                         {post.postType === 'YOUTUBE_LINK' && (
@@ -885,6 +972,7 @@ const Profile: React.FC = () => {
                             rel="noopener noreferrer"
                             className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-red-500/25"
                           >
+                            <span>📺</span>
                             <span>Watch on YouTube</span>
                           </a>
                         )}
