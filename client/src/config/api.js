@@ -56,5 +56,15 @@ export const API_ENDPOINTS = {
   NOTIFICATION_DELETE: (id) => buildApiUrl(`notifications/${id}`),
   
   // Search
-  SEARCH: buildApiUrl('search')
+  SEARCH: buildApiUrl('search'),
+  
+  // Playlists
+  PLAYLISTS: buildApiUrl('playlists'),
+  PLAYLIST_BY_ID: (id) => buildApiUrl(`playlists/${id}`),
+  PLAYLIST_DETAIL: (id) => buildApiUrl(`playlists/${id}`),
+  PLAYLISTS_BY_USER: (userId) => buildApiUrl(`playlists/user/${userId}`),
+  PLAYLIST_TRACKS: (id) => buildApiUrl(`playlists/${id}/tracks`),
+  PLAYLIST_TRACK_REMOVE: (playlistId, postId) => buildApiUrl(`playlists/${playlistId}/tracks/${postId}`),
+  PLAYLIST_TRACKS_REORDER: (id) => buildApiUrl(`playlists/${id}/tracks/reorder`),
+  PLAYLIST_TO_QUEUE: (id) => buildApiUrl(`playlists/${id}/queue`)
 };

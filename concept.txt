@@ -10,7 +10,7 @@ I want to make a website where users can post self-made samples OR links to song
     -Other users will be able to listen and download the uploaded MP3 and reply to the original post with a remix of the original MP3.  DONE
     -Users will be able to upvote/downvote and comment on posts/MP3 replies. DONE
     -Audio played from posts/replies should be able to be played seamlessly while browsing the site (like Soundcloud). DONE
-    -Post/reply audio can be added to a queue.
+    -Post/reply audio can be added to a queue. DONE
     -User will receive notifications when they receive a reply on their post. DONE
     -Users who reply will receive notifications when the receive a reply to their reply. DONE
     
@@ -19,12 +19,11 @@ I want to make a website where users can post self-made samples OR links to song
 
 
 To add: 
-- Add play next button on Post Detail and posts across all pages. 
-   
+ 
 - Playlists
-	- Display on profile. 
 	- Include in search. 
-	- Add button to Post Detail and posts across all pages. 
+	- Add 'Add to Playlist" button to Post Detail. 
+
 - Track listen history. 
 	- Visible on profile if owner. 
 - Email Verification. 
@@ -33,3 +32,5 @@ To add:
 Existing Issues:
 - Logs out when deleting comment
 - Fast forward and rewind button functionality
+- When a playlist is added to queue, it does not appear until the site is reloaded.
+- Reloading signs user out but keeps them signed into an undefined user.

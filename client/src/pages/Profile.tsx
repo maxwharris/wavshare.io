@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAudio } from '../contexts/AudioContext.tsx';
 import { useQueue } from '../contexts/QueueContext.tsx';
+import { usePlaylist } from '../contexts/PlaylistContext.tsx';
+import { useToast } from '../contexts/ToastContext.tsx';
 import ProfileAvatar from '../components/ProfileAvatar.tsx';
 import { API_ENDPOINTS, API_CONFIG } from '../config/api';
 
@@ -80,7 +82,7 @@ const Profile: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'posts' | 'remixes' | 'comments' | 'upvoted'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'remixes' | 'comments' | 'upvoted' | 'playlists'>('posts');
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     username: '',
@@ -92,10 +94,18 @@ const Profile: React.FC = () => {
   const [sortedPosts, setSortedPosts] = useState<UserProfile['posts']>([]);
   const [upvotedPosts, setUpvotedPosts] = useState<any[]>([]);
   const [upvotedLoading, setUpvotedLoading] = useState(false);
+  const [showCreatePlaylistModal, setShowCreatePlaylistModal] = useState(false);
+  const [newPlaylistName, setNewPlaylistName] = useState('');
+  const [newPlaylistDescription, setNewPlaylistDescription] = useState('');
+  const [isCreatingPlaylist, setIsCreatingPlaylist] = useState(false);
+  const [profilePlaylists, setProfilePlaylists] = useState<any[]>([]);
+  const [profilePlaylistsLoading, setProfilePlaylistsLoading] = useState(false);
 
   const { user, token } = useAuth();
   const { playTrack } = useAudio();
   const { addToQueue, addToQueueNext, isInQueue } = useQueue();
+  const { playlists: userPlaylists, loading: userPlaylistsLoading, createPlaylist, deletePlaylist, addPlaylistToQueue } = usePlaylist();
+  const { showNotification } = useToast();
 
   const isOwnProfile = user && userId === user.id;
 
@@ -337,6 +347,63 @@ const Profile: React.FC = () => {
     }
   };
 
+  const handleCreatePlaylist = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!newPlaylistName.trim()) {
+      showNotification('Playlist name is required', 'error');
+      return;
+    }
+
+    setIsCreatingPlaylist(true);
+    try {
+      await createPlaylist({
+        name: newPlaylistName.trim(),
+        description: newPlaylistDescription.trim() || undefined
+      });
+      
+      showNotification('Playlist created successfully!', 'success');
+      setShowCreatePlaylistModal(false);
+      setNewPlaylistName('');
+      setNewPlaylistDescription('');
+    } catch (error) {
+      console.error('Create playlist error:', error);
+      showNotification(error instanceof Error ? error.message : 'Failed to create playlist', 'error');
+    } finally {
+      setIsCreatingPlaylist(false);
+    }
+  };
+
+  const fetchProfilePlaylists = async () => {
+    if (!userId) return;
+
+    setProfilePlaylistsLoading(true);
+    try {
+      // Fetch playlists for any user using the public endpoint
+      const response = await fetch(API_ENDPOINTS.PLAYLISTS_BY_USER(userId));
+      const data = await response.json();
+
+      if (response.ok) {
+        setProfilePlaylists(data.playlists || []);
+      } else {
+        console.error('Failed to fetch playlists:', data.message);
+        setProfilePlaylists([]);
+      }
+    } catch (error) {
+      console.error('Fetch profile playlists error:', error);
+      setProfilePlaylists([]);
+    } finally {
+      setProfilePlaylistsLoading(false);
+    }
+  };
+
+  // Fetch playlists when playlists tab is selected
+  useEffect(() => {
+    if (activeTab === 'playlists' && userId) {
+      fetchProfilePlaylists();
+    }
+  }, [activeTab, userId, userPlaylists, isOwnProfile]);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -551,6 +618,16 @@ const Profile: React.FC = () => {
             }`}
           >
             Upvoted ({upvotedPosts.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('playlists')}
+            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+              activeTab === 'playlists'
+                ? 'border-blue-500 text-accent'
+                : 'border-transparent text-secondary hover:text-primary'
+            }`}
+          >
+            Playlists
           </button>
         </div>
 
@@ -991,7 +1068,185 @@ const Profile: React.FC = () => {
             )}
           </div>
         )}
+
+        {/* Playlists Tab */}
+        {activeTab === 'playlists' && (
+          <div className="space-y-4">
+            {profilePlaylistsLoading ? (
+              <div className="text-center py-8">
+                <div className="spinner h-8 w-8 mx-auto"></div>
+                <p className="text-secondary mt-2">Loading playlists...</p>
+              </div>
+            ) : profilePlaylists.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">🎵</div>
+                <h3 className="text-xl font-bold text-white mb-4">No playlists yet</h3>
+                <p className="text-secondary mb-6">Create your first playlist to start organizing your favorite tracks</p>
+                <button
+                  onClick={() => setShowCreatePlaylistModal(true)}
+                  className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                >
+                  Create Your First Playlist
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="text-sm text-secondary mb-4">
+                  {profilePlaylists.length} playlist{profilePlaylists.length !== 1 ? 's' : ''}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {profilePlaylists.map((playlist) => (
+                    <div key={playlist.id} className="bg-slate-800 rounded-lg p-4 hover:bg-slate-700 transition-colors">
+                      {/* Playlist Cover */}
+                      <div className="w-full h-32 bg-slate-700 rounded-lg mb-3 flex items-center justify-center">
+                        {playlist.coverImage ? (
+                          <img
+                            src={playlist.coverImage}
+                            alt={playlist.name}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          <div className="text-4xl text-slate-500">🎵</div>
+                        )}
+                      </div>
+
+                      {/* Playlist Info */}
+                      <div className="mb-3">
+                        <Link 
+                          to={`/playlist/${playlist.id}`}
+                          className="block hover:text-primary transition-colors"
+                        >
+                          <h4 className="text-lg font-bold text-white mb-1 truncate hover:text-primary transition-colors">{playlist.name}</h4>
+                        </Link>
+                        {playlist.description && (
+                          <p className="text-secondary text-sm mb-2 line-clamp-2">{playlist.description}</p>
+                        )}
+                        <p className="text-xs text-slate-400">
+                          {playlist.tracks?.length || 0} track{(playlist.tracks?.length || 0) !== 1 ? 's' : ''} • Created {formatDate(playlist.createdAt)}
+                        </p>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={async () => {
+                            try {
+                              const result = await addPlaylistToQueue(playlist.id, { shuffle: false, playNext: false });
+                              showNotification(result.message, 'success');
+                            } catch (error) {
+                              console.error('Add playlist to queue error:', error);
+                              showNotification(error instanceof Error ? error.message : 'Failed to add playlist to queue', 'error');
+                            }
+                          }}
+                          disabled={(playlist.tracks?.length || 0) === 0}
+                          className="flex-1 bg-primary hover:bg-primary-dark disabled:bg-slate-600 disabled:cursor-not-allowed text-white py-2 px-3 rounded text-sm font-medium transition-colors"
+                        >
+                          Play
+                        </button>
+                        <button
+                          onClick={async () => {
+                            try {
+                              const result = await addPlaylistToQueue(playlist.id, { shuffle: true, playNext: false });
+                              showNotification(result.message, 'success');
+                            } catch (error) {
+                              console.error('Add playlist to queue error:', error);
+                              showNotification(error instanceof Error ? error.message : 'Failed to add playlist to queue', 'error');
+                            }
+                          }}
+                          disabled={(playlist.tracks?.length || 0) === 0}
+                          className="flex-1 bg-slate-600 hover:bg-slate-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white py-2 px-3 rounded text-sm font-medium transition-colors"
+                        >
+                          Shuffle
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (!window.confirm(`Are you sure you want to delete "${playlist.name}"? This action cannot be undone.`)) {
+                              return;
+                            }
+                            try {
+                              await deletePlaylist(playlist.id);
+                              showNotification('Playlist deleted successfully', 'success');
+                            } catch (error) {
+                              console.error('Delete playlist error:', error);
+                              showNotification(error instanceof Error ? error.message : 'Failed to delete playlist', 'error');
+                            }
+                          }}
+                          className="bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded text-sm font-medium transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Create Playlist Modal */}
+      {showCreatePlaylistModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-2xl font-bold text-white mb-4">Create New Playlist</h2>
+            
+            <form onSubmit={handleCreatePlaylist}>
+              <div className="mb-4">
+                <label htmlFor="playlistName" className="block text-sm font-medium text-secondary mb-2">
+                  Playlist Name *
+                </label>
+                <input
+                  type="text"
+                  id="playlistName"
+                  value={newPlaylistName}
+                  onChange={(e) => setNewPlaylistName(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="Enter playlist name"
+                  maxLength={100}
+                  required
+                />
+              </div>
+
+              <div className="mb-6">
+                <label htmlFor="playlistDescription" className="block text-sm font-medium text-secondary mb-2">
+                  Description (Optional)
+                </label>
+                <textarea
+                  id="playlistDescription"
+                  value={newPlaylistDescription}
+                  onChange={(e) => setNewPlaylistDescription(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                  placeholder="Describe your playlist"
+                  rows={3}
+                  maxLength={500}
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreatePlaylistModal(false);
+                    setNewPlaylistName('');
+                    setNewPlaylistDescription('');
+                  }}
+                  className="flex-1 bg-slate-600 hover:bg-slate-500 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreatingPlaylist || !newPlaylistName.trim()}
+                  className="flex-1 bg-primary hover:bg-primary-dark disabled:bg-slate-600 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                >
+                  {isCreatingPlaylist ? 'Creating...' : 'Create'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

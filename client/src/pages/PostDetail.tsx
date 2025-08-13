@@ -3,6 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAudio } from '../contexts/AudioContext.tsx';
 import { useQueue } from '../contexts/QueueContext.tsx';
+import { usePlaylist } from '../contexts/PlaylistContext.tsx';
+import { useToast } from '../contexts/ToastContext.tsx';
 import ProfileAvatar from '../components/ProfileAvatar.tsx';
 import { API_ENDPOINTS, API_CONFIG } from '../config/api';
 
@@ -108,10 +110,14 @@ const PostDetail: React.FC = () => {
   const [commentVotes, setCommentVotes] = useState<{[key: string]: VoteStatus}>({});
   const [deletingPost, setDeletingPost] = useState(false);
   const [deletingComment, setDeletingComment] = useState<string | null>(null);
+  const [showAddToPlaylistModal, setShowAddToPlaylistModal] = useState(false);
+  const [addingToPlaylist, setAddingToPlaylist] = useState(false);
 
   const { user, token } = useAuth();
   const { playTrack } = useAudio();
   const { addToQueue, addToQueueNext, isInQueue } = useQueue();
+  const { playlists, addTrackToPlaylist } = usePlaylist();
+  const { showNotification } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -714,6 +720,13 @@ const PostDetail: React.FC = () => {
                     >
                       <span>{isInQueue(post.id) ? 'In Queue' : 'Add to Queue'}</span>
                     </button>
+                    <button
+                      onClick={() => setShowAddToPlaylistModal(true)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors"
+                    >
+                      <span>📋</span>
+                      <span>Add to Playlist</span>
+                    </button>
                   </>
                 )}
               </>
@@ -1136,6 +1149,70 @@ const PostDetail: React.FC = () => {
         </div>
         </div>
       </div>
+
+      {/* Add to Playlist Modal */}
+      {showAddToPlaylistModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-lg p-6 w-full max-w-md max-h-96 overflow-y-auto">
+            <h2 className="text-2xl font-bold text-white mb-4">Add to Playlist</h2>
+            
+            {playlists.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="text-4xl mb-4">🎵</div>
+                <p className="text-secondary mb-4">You don't have any playlists yet.</p>
+                <p className="text-sm text-muted">Create a playlist first to add tracks to it.</p>
+              </div>
+            ) : (
+              <div className="space-y-2 mb-6">
+                {playlists.map((playlist) => (
+                  <button
+                    key={playlist.id}
+                    onClick={async () => {
+                      if (!post) return;
+                      
+                      setAddingToPlaylist(true);
+                      try {
+                        await addTrackToPlaylist(playlist.id, post.id);
+                        showNotification(`Added "${post.title}" to "${playlist.name}"`, 'success');
+                        setShowAddToPlaylistModal(false);
+                      } catch (error) {
+                        console.error('Add to playlist error:', error);
+                        showNotification(error instanceof Error ? error.message : 'Failed to add to playlist', 'error');
+                      } finally {
+                        setAddingToPlaylist(false);
+                      }
+                    }}
+                    disabled={addingToPlaylist}
+                    className="w-full text-left p-3 bg-slate-700 hover:bg-slate-600 disabled:bg-slate-700 disabled:opacity-50 rounded-lg transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-slate-600 rounded flex items-center justify-center">
+                        <span className="text-xl">🎵</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-white truncate">{playlist.name}</h3>
+                        <p className="text-sm text-secondary">
+                          {playlist.tracks?.length || 0} track{(playlist.tracks?.length || 0) !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowAddToPlaylistModal(false)}
+                disabled={addingToPlaylist}
+                className="bg-slate-600 hover:bg-slate-500 disabled:bg-slate-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+              >
+                {addingToPlaylist ? 'Adding...' : 'Cancel'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

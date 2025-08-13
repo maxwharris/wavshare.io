@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { useAudio } from '../contexts/AudioContext.tsx';
 import { useQueue } from '../contexts/QueueContext.tsx';
+import { usePlaylist } from '../contexts/PlaylistContext.tsx';
+import { useToast } from '../contexts/ToastContext.tsx';
 import ProfileAvatar from '../components/ProfileAvatar.tsx';
 import { API_ENDPOINTS, buildServerUrl } from '../config/api';
 
@@ -46,10 +48,14 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('most_remixed');
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
   const { user } = useAuth();
   const { playTrack } = useAudio();
   const { addToQueue, addToQueueNext, isInQueue } = useQueue();
+  const { playlists, addTrackToPlaylist, removeTrackFromPlaylist, isTrackInPlaylist } = usePlaylist();
+  const { showNotification } = useToast();
 
   const fetchPosts = useCallback(async () => {
     setLoading(true);
@@ -98,6 +104,23 @@ const Home: React.FC = () => {
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  const handlePlaylistToggle = async (playlistId: string, postId: string) => {
+    try {
+      const isInPlaylist = isTrackInPlaylist(playlistId, postId);
+      
+      if (isInPlaylist) {
+        await removeTrackFromPlaylist(playlistId, postId);
+        showNotification('Track removed from playlist', 'success');
+      } else {
+        await addTrackToPlaylist(playlistId, postId);
+        showNotification('Track added to playlist', 'success');
+      }
+    } catch (error) {
+      console.error('Playlist toggle error:', error);
+      showNotification(error instanceof Error ? error.message : 'Failed to update playlist', 'error');
+    }
   };
 
   return (
@@ -367,6 +390,88 @@ const Home: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Playlist Modal */}
+      {showPlaylistModal && selectedPost && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-lg p-6 w-full max-w-md max-h-96 overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-white">Add to Playlist</h2>
+              <button
+                onClick={() => {
+                  setShowPlaylistModal(false);
+                  setSelectedPost(null);
+                }}
+                className="text-gray-400 hover:text-white text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="mb-4 p-3 bg-slate-700 rounded-lg">
+              <h3 className="font-medium text-white truncate">{selectedPost.title}</h3>
+              <p className="text-sm text-gray-400">by {selectedPost.user.username}</p>
+            </div>
+
+            {playlists.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-400 mb-4">You don't have any playlists yet.</p>
+                <Link
+                  to="/playlists"
+                  className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  onClick={() => {
+                    setShowPlaylistModal(false);
+                    setSelectedPost(null);
+                  }}
+                >
+                  Create Your First Playlist
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {playlists.map((playlist) => {
+                  const isInPlaylist = isTrackInPlaylist(playlist.id, selectedPost.id);
+                  return (
+                    <div
+                      key={playlist.id}
+                      className="flex items-center justify-between p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                    >
+                      <div className="flex-1">
+                        <h4 className="font-medium text-white truncate">{playlist.name}</h4>
+                        <p className="text-sm text-gray-400">
+                          {playlist.tracks?.length || 0} track{(playlist.tracks?.length || 0) !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handlePlaylistToggle(playlist.id, selectedPost.id)}
+                        className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                          isInPlaylist
+                            ? 'bg-red-600 hover:bg-red-700 text-white'
+                            : 'bg-green-600 hover:bg-green-700 text-white'
+                        }`}
+                      >
+                        {isInPlaylist ? 'Remove' : 'Add'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => {
+                  setShowPlaylistModal(false);
+                  setSelectedPost(null);
+                }}
+                className="bg-slate-600 hover:bg-slate-500 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

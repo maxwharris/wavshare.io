@@ -33,6 +33,7 @@ model User {
   sentNotifications          Notification[] @relation("NotificationFromUser")
   queueItems                 UserQueue[]
   queueSettings              UserQueueSettings?
+  playlists                  Playlist[]
 
   @@map("users")
 }
@@ -50,14 +51,15 @@ model Post {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   // Relations
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tags            Tag[]          @relation("PostTags")
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags            Tag[]           @relation("PostTags")
   votes           Vote[]
   comments        Comment[]
-  originalRemixes Remix[]        @relation("OriginalPost")
-  remixPosts      Remix[]        @relation("RemixPost")
+  originalRemixes Remix[]         @relation("OriginalPost")
+  remixPosts      Remix[]         @relation("RemixPost")
   notifications   Notification[]
   queueItems      UserQueue[]
+  playlistTracks  PlaylistTrack[]
 
   @@map("posts")
 }
@@ -197,4 +199,37 @@ model UserQueueSettings {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@map("user_queue_settings")
+}
+
+model Playlist {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  name        String
+  description String?
+  isPublic    Boolean  @default(false) @map("is_public")
+  coverImage  String?  @map("cover_image")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tracks PlaylistTrack[]
+
+  @@map("playlists")
+}
+
+model PlaylistTrack {
+  id         String   @id @default(cuid())
+  playlistId String   @map("playlist_id")
+  postId     String   @map("post_id")
+  position   Int      // Order in playlist
+  addedAt    DateTime @default(now()) @map("added_at")
+
+  // Relations
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  post     Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, postId]) // Prevent duplicates
+  @@index([playlistId, position]) // Optimize playlist ordering
+  @@map("playlist_tracks")
 }

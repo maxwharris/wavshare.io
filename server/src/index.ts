@@ -17,6 +17,7 @@ import voteRoutes from './routes/votes';
 import notificationRoutes from './routes/notifications';
 import searchRoutes from './routes/search';
 import queueRoutes from './routes/queue';
+import playlistRoutes from './routes/playlists';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
@@ -60,6 +61,7 @@ app.use('/api/votes', voteRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/queue', queueRoutes);
+app.use('/api/playlists', playlistRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

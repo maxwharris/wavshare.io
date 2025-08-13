@@ -155,10 +155,54 @@ router.get('/', async (req, res): Promise<void> => {
       take: 30 // Limit results
     });
 
+    // Search playlists by name or description
+    const playlists = await prisma.playlist.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: searchQuery
+            }
+          },
+          {
+            description: {
+              contains: searchQuery
+            }
+          },
+          {
+            user: {
+              username: {
+                contains: searchQuery
+              }
+            }
+          }
+        ]
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            profilePhoto: true
+          }
+        },
+        _count: {
+          select: {
+            tracks: true
+          }
+        }
+      },
+      orderBy: {
+        updatedAt: 'desc'
+      },
+      take: 20 // Limit results
+    });
+
     res.json({
       posts,
       users,
-      tags
+      tags,
+      playlists
     });
 
   } catch (error) {
