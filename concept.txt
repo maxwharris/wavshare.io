@@ -6,8 +6,7 @@ To add:
 
 - Require email verification before allowing users to post/reply.
 
+- Change fonts / design
 
 Existing Issues:
 - Fast forward and rewind button functionality
-
-- Logs out when deleting comment

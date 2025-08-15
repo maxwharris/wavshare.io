@@ -1,0 +1,25 @@
+PHASE 1
+
+- Transfer all files to EC2 server
+
+- Make Logo
+
+- Purchase domain 'wavshare.io'
+
+- Implement Domain
+
+- Start documenting for TikTok
+
+
+
+PHASE 2
+
+- Find Artists to Use wavshare / Give feedback
+
+- Start Social Media Accounts
+
+- List on Websites (Product Hunt, reddit, + find more)
+
+
+
+
