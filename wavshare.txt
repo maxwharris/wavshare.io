@@ -1,10 +1,10 @@
 PHASE 1
 
-- Transfer all files to EC2 server
+- Transfer all files to EC2 server (DONE-ish)
 
 - Make Logo
 
-- Purchase domain 'wavshare.io'
+- Purchase domain 'wavshare.io' (DONE)
 
 - Implement Domain
 
