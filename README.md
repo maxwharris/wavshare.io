@@ -46,7 +46,7 @@ A full-stack music collaboration platform where users can share original music s
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/maxwharris/wavshare.io.git
    cd remixthis
    ```
 
@@ -86,7 +86,7 @@ A full-stack music collaboration platform where users can share original music s
    EMAIL_PORT=587
    EMAIL_USER=your-email@gmail.com
    EMAIL_PASS=your-app-password
-   EMAIL_FROM=wavshare <noreply@remixthis.com>
+   EMAIL_FROM=wavshare <noreply@wavshare.io>
    ```
 
 6. **Start the development servers**

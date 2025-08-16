@@ -1,8 +1,13 @@
 {
-  "name": "remixthis",
+  "name": "wavshare",
   "version": "1.0.0",
-  "description": "A music collaboration platform for sharing and remixing audio content",
+  "description": "wavshare - A music collaboration platform for sharing and remixing audio content",
   "main": "index.js",
+  "homepage": "https://wavshare.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maxwharris/wavshare.io.git"
+  },
   "scripts": {
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
     "server:dev": "cd server && npm run dev",

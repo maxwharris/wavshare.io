@@ -6,7 +6,7 @@ Use this checklist to ensure a smooth deployment to production.
 
 ### 1. Environment Configuration
 - [ ] Run `npm run setup:prod` to configure production environment
-- [ ] Replace `YOUR_DOMAIN.com` with your actual domain in all config files
+- [ ] Replace `YOUR_DOMAIN.com` with wavshare.io in all config files
 - [ ] Generate and set a strong JWT secret (64+ characters)
 - [ ] Configure production database connection string
 - [ ] Set up email service credentials (SMTP)
@@ -168,7 +168,7 @@ npm run build:prod
 npm run start:prod
 
 # Check application health
-curl https://yourdomain.com/api/health
+curl https://wavshare.io/api/health
 ```
 
 ## Common Issues and Solutions
