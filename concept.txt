@@ -8,5 +8,8 @@ To add:
 
 - Change fonts / design
 
+- Custom profile (custom html?)
+
 Existing Issues:
 - Fast forward and rewind button functionality
+- Tags are broken (investigate)
