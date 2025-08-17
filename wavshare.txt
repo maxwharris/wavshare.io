@@ -1,12 +1,12 @@
 PHASE 1
 
-- Transfer all files to EC2 server (DONE-ish)
+- Transfer all files to EC2 server (DONE)
 
 - Make Logo
 
 - Purchase domain 'wavshare.io' (DONE)
 
-- Implement Domain
+- Implement Domain (DONE)
 
 - Start documenting for TikTok
 
