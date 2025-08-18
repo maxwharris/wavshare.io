@@ -13,18 +13,18 @@ server/dist/
 
 # Environment variables
 # Keep template files but ignore sensitive local overrides
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-server/.env.local
-server/.env.development.local
-server/.env.test.local
-server/.env.production.local
-client/.env.local
-client/.env.development.local
-client/.env.test.local
-client/.env.production.local
+#.env.local
+#.env.development.local
+#.env.test.local
+#.env.production.local
+#server/.env.local
+#server/.env.development.local
+#server/.env.test.local
+#server/.env.production.local
+#client/.env.local
+#client/.env.development.local
+#client/.env.test.local
+#client/.env.production.local
 
 # Note: .env, .env.development, and .env.production files are tracked
 # for template purposes, but sensitive values should use .local overrides
@@ -137,9 +137,7 @@ database/*.sqlite
 database/*.sqlite3
 
 # Uploaded files
-uploads/
-server/uploads/
-*/uploads/
+
 
 # Prisma
 prisma/migrations/

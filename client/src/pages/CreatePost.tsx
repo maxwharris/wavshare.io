@@ -146,7 +146,9 @@ const CreatePost: React.FC = () => {
       }
       
       if (allTags.length > 0) {
-        formDataToSend.append('tags', JSON.stringify(allTags));
+        allTags.forEach(tag => {
+          formDataToSend.append('tags[]', tag);
+        });
       }
 
       const response = await fetch(API_ENDPOINTS.POSTS, {

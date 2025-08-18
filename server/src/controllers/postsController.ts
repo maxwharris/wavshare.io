@@ -308,10 +308,20 @@ export const createPost = async (req: AuthRequest, res: Response): Promise<void>
     }
 
     // Handle tags if provided
-    if (tags && Array.isArray(tags) && tags.length > 0) {
+    // Tags can come as an array (tags[]) or as individual entries
+    let tagsArray = tags;
+    if (typeof tags === 'string') {
+      // Single tag as string
+      tagsArray = [tags];
+    } else if (!Array.isArray(tags) && tags) {
+      // Convert to array if it's not already
+      tagsArray = [tags];
+    }
+
+    if (tagsArray && Array.isArray(tagsArray) && tagsArray.length > 0) {
       const tagConnections = [];
       
-      for (const tagName of tags) {
+      for (const tagName of tagsArray) {
         // Find or create tag
         let tag = await prisma.tag.findUnique({
           where: { name: tagName.toLowerCase().trim() }
