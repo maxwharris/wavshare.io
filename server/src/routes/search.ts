@@ -26,6 +26,10 @@ router.get('/', async (req, res): Promise<void> => {
 
     // Text search conditions
     if (searchQuery) {
+      // Handle tag searches that start with #
+      const isTagSearch = searchQuery.startsWith('#');
+      const tagSearchQuery = isTagSearch ? searchQuery.substring(1) : searchQuery;
+      
       andConditions.push({
         OR: [
           {
@@ -50,7 +54,7 @@ router.get('/', async (req, res): Promise<void> => {
               some: {
                 tag: {
                   name: {
-                    contains: searchQuery
+                    contains: tagSearchQuery
                   }
                 }
               }
@@ -62,11 +66,16 @@ router.get('/', async (req, res): Promise<void> => {
 
     // Key filtering
     if (keyFilter) {
+      // Convert frontend key format to database format
+      // Frontend sends: "C#", "Cm", etc.
+      // Database stores: "key:c#", "key:cm", etc. (lowercase)
+      const dbKeyFormat = `key:${keyFilter.toLowerCase()}`;
+      
       andConditions.push({
         postTags: {
           some: {
             tag: {
-              name: `key:${keyFilter}`
+              name: dbKeyFormat
             }
           }
         }
@@ -147,7 +156,7 @@ router.get('/', async (req, res): Promise<void> => {
     const tags = await prisma.tag.findMany({
       where: {
         name: {
-          contains: searchQuery
+          contains: searchQuery.startsWith('#') ? searchQuery.substring(1) : searchQuery
         }
       },
       include: {

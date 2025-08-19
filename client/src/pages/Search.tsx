@@ -20,9 +20,11 @@ interface SearchResults {
       username: string;
       profilePhoto?: string;
     };
-    tags: Array<{
-      id: string;
-      name: string;
+    postTags: Array<{
+      tag: {
+        id: string;
+        name: string;
+      };
     }>;
     _count: {
       votes: number;
@@ -70,7 +72,7 @@ const Search: React.FC = () => {
   const [results, setResults] = useState<SearchResults | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'posts' | 'users' | 'tags' | 'playlists'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'users' | 'playlists'>('posts');
   const [bpmMin, setBpmMin] = useState('');
   const [bpmMax, setBpmMax] = useState('');
   const [selectedKey, setSelectedKey] = useState('');
@@ -158,10 +160,10 @@ const Search: React.FC = () => {
     // Apply BPM filtering
     if (bpmMin || bpmMax) {
       filteredPosts = filteredPosts.filter(post => {
-        const bpmTag = post.tags.find(tag => tag.name.startsWith('bpm:'));
+        const bpmTag = post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:'));
         if (!bpmTag) return false;
         
-        const bpm = parseInt(bpmTag.name.replace('bpm:', ''));
+        const bpm = parseInt(bpmTag.tag.name.replace('bpm:', ''));
         if (isNaN(bpm)) return false;
         
         if (bpmMin && bpm < parseInt(bpmMin)) return false;
@@ -337,16 +339,6 @@ const Search: React.FC = () => {
               Users ({results.users.length})
             </button>
             <button
-              onClick={() => setActiveTab('tags')}
-              className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-                activeTab === 'tags'
-                  ? 'border-blue-500 text-accent'
-                  : 'border-transparent text-secondary hover:text-primary'
-              }`}
-            >
-              Tags ({results.tags.length})
-            </button>
-            <button
               onClick={() => setActiveTab('playlists')}
               className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
                 activeTab === 'playlists'
@@ -395,18 +387,42 @@ const Search: React.FC = () => {
                       )}
                     </Link>
 
-                    {post.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {post.tags.map((tag) => (
-                          <span 
-                            key={tag.id}
-                            className="tag"
-                          >
-                            #{tag.name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                    {/* Tags, BPM, and Key */}
+                    <div className="mb-4">
+                      {/* Regular Tags */}
+                      {post.postTags.filter(postTag => !postTag.tag.name.startsWith('bpm:') && !postTag.tag.name.startsWith('key:')).length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {post.postTags
+                            .filter(postTag => !postTag.tag.name.startsWith('bpm:') && !postTag.tag.name.startsWith('key:'))
+                            .map((postTag) => (
+                              <span 
+                                key={postTag.tag.id}
+                                className="tag"
+                              >
+                                #{postTag.tag.name}
+                              </span>
+                            ))}
+                        </div>
+                      )}
+                      
+                      {/* BPM and Key Info */}
+                      {(post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) || post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))) && (
+                        <div className="flex flex-wrap gap-2 text-sm">
+                          {post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) && (
+                            <div className="flex items-center space-x-1 px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full border border-blue-500/30">
+                              <span className="font-semibold">BPM:</span>
+                              <span>{post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:'))?.tag.name.replace('bpm:', '')}</span>
+                            </div>
+                          )}
+                          {post.postTags.find(postTag => postTag.tag.name.startsWith('key:')) && (
+                            <div className="flex items-center space-x-1 px-3 py-1 bg-purple-600/20 text-purple-300 rounded-full border border-purple-500/30">
+                              <span className="font-semibold">Key:</span>
+                              <span>{post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))?.tag.name.replace('key:', '')}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
@@ -536,31 +552,6 @@ const Search: React.FC = () => {
             </div>
           )}
 
-          {/* Tags Results */}
-          {activeTab === 'tags' && (
-            <div className="space-y-4">
-              {results.tags.length === 0 ? (
-                <p className="text-muted text-center py-8">No tags found for "{query}"</p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {results.tags.map((tag) => (
-                    <div key={tag.id} className="post-card p-4 hover-lift text-center">
-                      <div className="text-2xl font-bold text-accent mb-2">#{tag.name}</div>
-                      <p className="text-sm text-muted">
-                        {tag._count.posts} post{tag._count.posts !== 1 ? 's' : ''}
-                      </p>
-                      <button
-                        onClick={() => setQuery(`#${tag.name}`)}
-                        className="btn-secondary mt-3 text-sm"
-                      >
-                        Search Posts
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Playlists Results */}
           {activeTab === 'playlists' && (
