@@ -59,7 +59,11 @@ export const getUserProfile = async (req: Request, res: Response): Promise<void>
         createdAt: true,
         posts: {
           include: {
-            tags: true,
+            postTags: {
+              include: {
+                tag: true
+              }
+            },
             votes: true,
             comments: true,
             _count: {
@@ -174,7 +178,14 @@ export const getUserProfile = async (req: Request, res: Response): Promise<void>
     });
 
     const profileData = {
-      ...user,
+      id: user.id,
+      username: user.username,
+      profilePhoto: user.profilePhoto,
+      description: user.description,
+      createdAt: user.createdAt,
+      posts: user.posts,
+      comments: user.comments,
+      remixes: user.remixes,
       stats: {
         ...user._count,
         totalUpvotes,
@@ -358,7 +369,11 @@ export const getUserPosts = async (req: Request, res: Response): Promise<void> =
             profilePhoto: true
           }
         },
-        tags: true,
+        postTags: {
+          include: {
+            tag: true
+          }
+        },
         _count: {
           select: {
             votes: true,
@@ -518,7 +533,11 @@ export const getUserUpvotedPosts = async (req: Request, res: Response): Promise<
                 profilePhoto: true
               }
             },
-            tags: true,
+            postTags: {
+              include: {
+                tag: true
+              }
+            },
             _count: {
               select: {
                 votes: true,

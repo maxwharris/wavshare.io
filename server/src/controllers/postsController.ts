@@ -162,7 +162,11 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
             profilePhoto: true
           }
         },
-        tags: true,
+        postTags: {
+          include: {
+            tag: true
+          }
+        },
         remixPosts: {
           include: {
             originalPost: {
@@ -223,6 +227,11 @@ export const createPost = async (req: AuthRequest, res: Response): Promise<void>
     const { title, description, postType, youtubeUrl, tags, originalPostId } = req.body;
     const userId = req.user!.id;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+    // Debug logging to see what we're receiving
+    console.log('Request body:', req.body);
+    console.log('Tags received:', tags);
+    console.log('Tags type:', typeof tags);
 
     // Validate post type
     if (!['AUDIO_FILE', 'YOUTUBE_LINK'].includes(postType)) {
@@ -285,7 +294,11 @@ export const createPost = async (req: AuthRequest, res: Response): Promise<void>
             profilePhoto: true
           }
         },
-        tags: true,
+        postTags: {
+          include: {
+            tag: true
+          }
+        },
         _count: {
           select: {
             votes: true,
@@ -318,56 +331,94 @@ export const createPost = async (req: AuthRequest, res: Response): Promise<void>
       tagsArray = [tags];
     }
 
+    console.log('Processing tags array:', tagsArray);
+
     if (tagsArray && Array.isArray(tagsArray) && tagsArray.length > 0) {
-      const tagConnections = [];
+      // Remove duplicates and filter empty tags
+      const uniqueTags = [...new Set(tagsArray.map(tag => tag.toLowerCase().trim()))].filter(tag => tag);
+      console.log('Unique tags to process:', uniqueTags);
       
-      for (const tagName of tagsArray) {
-        // Find or create tag
-        let tag = await prisma.tag.findUnique({
-          where: { name: tagName.toLowerCase().trim() }
-        });
-
-        if (!tag) {
-          tag = await prisma.tag.create({
-            data: { name: tagName.toLowerCase().trim() }
+      try {
+        for (const tagName of uniqueTags) {
+          console.log(`Processing tag: ${tagName}`);
+          
+          // Find or create tag
+          let tag = await prisma.tag.findUnique({
+            where: { name: tagName }
           });
-        }
 
-        tagConnections.push({
-          postId: post.id,
-          tagId: tag.id
-        });
-      }
+          if (!tag) {
+            console.log(`Creating new tag: ${tagName}`);
+            tag = await prisma.tag.create({
+              data: { name: tagName }
+            });
+            console.log(`Created tag with ID: ${tag.id}`);
+          } else {
+            console.log(`Found existing tag: ${tagName} with ID: ${tag.id}`);
+          }
 
-      // Connect tags to post
-      await prisma.postTag.createMany({
-        data: tagConnections
-      });
-
-      // Fetch the updated post with tags
-      const updatedPost = await prisma.post.findUnique({
-        where: { id: post.id },
-        include: {
-          user: {
-            select: {
-              id: true,
-              username: true,
-              profilePhoto: true
+          // Check if the post-tag relationship already exists
+          const existingPostTag = await prisma.postTag.findUnique({
+            where: {
+              postId_tagId: {
+                postId: post.id,
+                tagId: tag.id
+              }
             }
-          },
-          tags: true,
-          _count: {
-            select: {
-              votes: true,
-              comments: true,
-              originalRemixes: true
-            }
+          });
+
+          // Only create the relationship if it doesn't exist
+          if (!existingPostTag) {
+            console.log(`Creating PostTag relationship for post ${post.id} and tag ${tag.id}`);
+            await prisma.postTag.create({
+              data: {
+                postId: post.id,
+                tagId: tag.id
+              }
+            });
+            console.log(`Created PostTag relationship successfully`);
+          } else {
+            console.log(`PostTag relationship already exists for post ${post.id} and tag ${tag.id}`);
           }
         }
-      });
 
-      res.status(201).json(updatedPost);
+        console.log('All tags processed, fetching updated post...');
+        
+        // Fetch the updated post with tags
+        const updatedPost = await prisma.post.findUnique({
+          where: { id: post.id },
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                profilePhoto: true
+              }
+            },
+            postTags: {
+              include: {
+                tag: true
+              }
+            },
+            _count: {
+              select: {
+                votes: true,
+                comments: true,
+                originalRemixes: true
+              }
+            }
+          }
+        });
+
+        console.log('Updated post with tags:', updatedPost?.postTags);
+        res.status(201).json(updatedPost);
+      } catch (tagError) {
+        console.error('Error processing tags:', tagError);
+        // Still return the post even if tag processing fails
+        res.status(201).json(post);
+      }
     } else {
+      console.log('No tags to process, returning post without tags');
       res.status(201).json(post);
     }
   } catch (error) {
@@ -394,7 +445,11 @@ export const getPostById = async (req: Request, res: Response): Promise<void> =>
             description: true
           }
         },
-        tags: true,
+        postTags: {
+          include: {
+            tag: true
+          }
+        },
         votes: {
           include: {
             user: {
@@ -511,7 +566,11 @@ export const updatePost = async (req: AuthRequest, res: Response): Promise<void>
             profilePhoto: true
           }
         },
-        tags: true,
+          postTags: {
+            include: {
+              tag: true
+            }
+          },
         _count: {
           select: {
             votes: true,
@@ -567,7 +626,11 @@ export const updatePost = async (req: AuthRequest, res: Response): Promise<void>
               profilePhoto: true
             }
           },
-          tags: true,
+          postTags: {
+            include: {
+              tag: true
+            }
+          },
           _count: {
             select: {
               votes: true,

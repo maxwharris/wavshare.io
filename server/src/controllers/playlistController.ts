@@ -27,7 +27,11 @@ export const getUserPlaylists = async (req: AuthRequest, res: Response) => {
                     profilePhoto: true
                   }
                 },
-                tags: true
+                postTags: {
+                  include: {
+                    tag: true
+                  }
+                }
               }
             }
           },
@@ -78,7 +82,11 @@ export const getPlaylistsByUserId = async (req: AuthRequest, res: Response) => {
                     profilePhoto: true
                   }
                 },
-                tags: true
+                postTags: {
+                  include: {
+                    tag: true
+                  }
+                }
               }
             }
           },
@@ -126,7 +134,11 @@ export const getPlaylistById = async (req: AuthRequest, res: Response) => {
                     profilePhoto: true
                   }
                 },
-                tags: true,
+                postTags: {
+                  include: {
+                    tag: true
+                  }
+                },
                 _count: {
                   select: {
                     votes: true,
@@ -429,7 +441,11 @@ export const addTrackToPlaylist = async (req: AuthRequest, res: Response) => {
                 profilePhoto: true
               }
             },
-            tags: true
+            postTags: {
+              include: {
+                tag: true
+              }
+            }
           }
         }
       }

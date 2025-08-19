@@ -22,9 +22,11 @@ interface Post {
     username: string;
     profilePhoto?: string;
   };
-  tags: Array<{
-    id: string;
-    name: string;
+  postTags: Array<{
+    tag: {
+      id: string;
+      name: string;
+    };
   }>;
   remixPosts?: Array<{
     originalPost: {
@@ -292,18 +294,42 @@ const Home: React.FC = () => {
                   </div>
                 </div>
 
-                {post.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {post.tags.map((tag) => (
-                      <span 
-                        key={tag.id}
-                        className="tag"
-                      >
-                        #{tag.name}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                {/* Tags, BPM, and Key */}
+                <div className="mb-4">
+                  {/* Regular Tags */}
+                  {post.postTags.filter(postTag => !postTag.tag.name.startsWith('bpm:') && !postTag.tag.name.startsWith('key:')).length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {post.postTags
+                        .filter(postTag => !postTag.tag.name.startsWith('bpm:') && !postTag.tag.name.startsWith('key:'))
+                        .map((postTag) => (
+                          <span 
+                            key={postTag.tag.id}
+                            className="tag"
+                          >
+                            #{postTag.tag.name}
+                          </span>
+                        ))}
+                    </div>
+                  )}
+                  
+                  {/* BPM and Key Info */}
+                  {(post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) || post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))) && (
+                    <div className="flex flex-wrap gap-2 text-sm">
+                      {post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) && (
+                        <div className="flex items-center space-x-1 px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full border border-blue-500/30">
+                          <span className="font-semibold">BPM:</span>
+                          <span>{post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:'))?.tag.name.replace('bpm:', '')}</span>
+                        </div>
+                      )}
+                      {post.postTags.find(postTag => postTag.tag.name.startsWith('key:')) && (
+                        <div className="flex items-center space-x-1 px-3 py-1 bg-purple-600/20 text-purple-300 rounded-full border border-purple-500/30">
+                          <span className="font-semibold">Key:</span>
+                          <span>{post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))?.tag.name.replace('key:', '')}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">

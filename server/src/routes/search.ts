@@ -46,10 +46,12 @@ router.get('/', async (req, res): Promise<void> => {
             }
           },
           {
-            tags: {
+            postTags: {
               some: {
-                name: {
-                  contains: searchQuery
+                tag: {
+                  name: {
+                    contains: searchQuery
+                  }
                 }
               }
             }
@@ -61,9 +63,11 @@ router.get('/', async (req, res): Promise<void> => {
     // Key filtering
     if (keyFilter) {
       andConditions.push({
-        tags: {
+        postTags: {
           some: {
-            name: `key:${keyFilter}`
+            tag: {
+              name: `key:${keyFilter}`
+            }
           }
         }
       });
@@ -85,7 +89,11 @@ router.get('/', async (req, res): Promise<void> => {
             profilePhoto: true
           }
         },
-        tags: true,
+        postTags: {
+          include: {
+            tag: true
+          }
+        },
         _count: {
           select: {
             votes: true,
@@ -145,7 +153,7 @@ router.get('/', async (req, res): Promise<void> => {
       include: {
         _count: {
           select: {
-            posts: true
+            postTags: true
           }
         }
       },

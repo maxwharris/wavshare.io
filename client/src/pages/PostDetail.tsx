@@ -23,9 +23,11 @@ interface Post {
     profilePhoto?: string;
     description?: string;
   };
-  tags: Array<{
-    id: string;
-    name: string;
+  postTags: Array<{
+    tag: {
+      id: string;
+      name: string;
+    };
   }>;
   votes: Array<{
     id: string;
@@ -635,16 +637,16 @@ const PostDetail: React.FC = () => {
         {/* Tags, BPM, and Key */}
         <div className="mb-6">
           {/* Regular Tags */}
-          {post.tags.filter(tag => !tag.name.startsWith('bpm:') && !tag.name.startsWith('key:')).length > 0 && (
+          {post.postTags.filter(postTag => !postTag.tag.name.startsWith('bpm:') && !postTag.tag.name.startsWith('key:')).length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
-              {post.tags
-                .filter(tag => !tag.name.startsWith('bpm:') && !tag.name.startsWith('key:'))
-                .map((tag) => (
+              {post.postTags
+                .filter(postTag => !postTag.tag.name.startsWith('bpm:') && !postTag.tag.name.startsWith('key:'))
+                .map((postTag) => (
                   <span 
-                    key={tag.id}
+                    key={postTag.tag.id}
                     className="tag"
                   >
-                    #{tag.name}
+                    #{postTag.tag.name}
                   </span>
                 ))}
             </div>
@@ -652,16 +654,16 @@ const PostDetail: React.FC = () => {
           
           {/* BPM and Key Info */}
           <div className="flex flex-wrap gap-4 text-sm">
-            {post.tags.find(tag => tag.name.startsWith('bpm:')) && (
+            {post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) && (
               <div className="flex items-center space-x-1 px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full border border-blue-500/30">
                 <span className="font-semibold">BPM:</span>
-                <span>{post.tags.find(tag => tag.name.startsWith('bpm:'))?.name.replace('bpm:', '')}</span>
+                <span>{post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:'))?.tag.name.replace('bpm:', '')}</span>
               </div>
             )}
-            {post.tags.find(tag => tag.name.startsWith('key:')) && (
+            {post.postTags.find(postTag => postTag.tag.name.startsWith('key:')) && (
               <div className="flex items-center space-x-1 px-3 py-1 bg-purple-600/20 text-purple-300 rounded-full border border-purple-500/30">
                 <span className="font-semibold">Key:</span>
-                <span>{post.tags.find(tag => tag.name.startsWith('key:'))?.name.replace('key:', '')}</span>
+                <span>{post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))?.tag.name.replace('key:', '')}</span>
               </div>
             )}
           </div>

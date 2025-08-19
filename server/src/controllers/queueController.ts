@@ -25,7 +25,11 @@ export const getUserQueue = async (req: AuthRequest, res: Response) => {
                 profilePhoto: true
               }
             },
-            tags: true
+            postTags: {
+              include: {
+                tag: true
+              }
+            }
           }
         }
       },
@@ -130,7 +134,11 @@ export const addToQueue = async (req: AuthRequest, res: Response) => {
                 profilePhoto: true
               }
             },
-            tags: true
+            postTags: {
+              include: {
+                tag: true
+              }
+            }
           }
         }
       }
@@ -228,7 +236,11 @@ export const addToQueueNext = async (req: AuthRequest, res: Response) => {
                 profilePhoto: true
               }
             },
-            tags: true
+            postTags: {
+              include: {
+                tag: true
+              }
+            }
           }
         }
       }
