@@ -103,23 +103,24 @@
 
 /* Enhanced button styles */
 .play-button {
-  background: linear-gradient(45deg, #10b981, #059669);
-  border: none;
+  background: #f3f4f6;
+  border: 2px solid #10b981;
   border-radius: 50%;
   width: 48px;
   height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #374151;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .play-button:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  background: #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .play-button:active {
@@ -127,25 +128,25 @@
 }
 
 .control-button {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: #f9fafb;
+  border: 1px solid #10b981;
   border-radius: 50%;
   width: 40px;
   height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #059669;
+  color: #374151;
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 16px;
 }
 
 .control-button:hover {
-  background: rgba(16, 185, 129, 0.2);
-  border-color: rgba(16, 185, 129, 0.5);
+  background: #f3f4f6;
+  border-color: #059669;
   transform: scale(1.05);
-  color: #047857;
+  color: #1f2937;
 }
 
 .control-button:active {
@@ -241,21 +242,22 @@
 
 /* Vote buttons */
 .vote-button {
-  background: transparent;
+  background: #f9fafb;
   border: 1px solid #e5e7eb;
   color: #6b7280;
   transition: all 0.2s ease;
 }
 
 .vote-button:hover {
+  background: #f3f4f6;
   border-color: #10b981;
   color: #10b981;
 }
 
 .vote-button.active {
-  background: #10b981;
+  background: #f3f4f6;
   border-color: #10b981;
-  color: white;
+  color: #10b981;
 }
 
 /* Audio player enhancements */

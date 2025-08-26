@@ -579,7 +579,7 @@ const PostDetail: React.FC = () => {
 
   return (
     <div 
-      className="fixed inset-0 top-16 overflow-y-auto"
+      className="fixed inset-0 overflow-y-auto"
       style={{
         backgroundImage: post.coverArt 
           ? `linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), url(${API_CONFIG.SERVER_URL}/${post.coverArt})`
@@ -589,7 +589,7 @@ const PostDetail: React.FC = () => {
         backgroundAttachment: 'fixed'
       }}
     >
-      <div className="max-w-4xl mx-auto relative z-10 py-6">
+      <div className="max-w-4xl mx-auto relative z-10 pt-24 pb-6">
         {/* Post Content */}
         <div className="card bg-slate-800/90 backdrop-blur-sm border-slate-600/50 mb-6">
         <div className="flex items-start justify-between mb-6">

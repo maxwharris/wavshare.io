@@ -251,7 +251,8 @@ const Profile: React.FC = () => {
         artist: profile?.username || 'Unknown',
         url: audioUrl,
         postId: post.id,
-        userId: profile?.id || ''
+        userId: profile?.id || '',
+        coverArt: post.coverArt
       });
     }
   };
@@ -439,7 +440,7 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 navbar-spacing audio-player-spacing">
       {/* Profile Header */}
       <div className="card">
         <div className="flex items-start justify-between mb-6">
@@ -557,23 +558,43 @@ const Profile: React.FC = () => {
           </form>
         )}
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        {/* Enhanced Stats with Social Proof */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 bg-gray-50 rounded-xl border border-gray-200">
           <div className="text-center">
-            <div className="text-2xl font-bold text-emerald-600">{profile.stats.posts}</div>
-            <div className="text-sm text-secondary">posts</div>
+            <div className="text-3xl font-bold text-emerald-600 mb-1">{profile.stats.posts}</div>
+            <div className="text-sm text-secondary font-medium">posts</div>
+            {profile.stats.posts > 10 && (
+              <div className="mt-1">
+                <span className="popular-indicator">prolific</span>
+              </div>
+            )}
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-emerald-700">{profile.stats.remixes}</div>
-            <div className="text-sm text-secondary">remixes</div>
+            <div className="text-3xl font-bold text-emerald-700 mb-1">{profile.stats.remixes}</div>
+            <div className="text-sm text-secondary font-medium">remixes</div>
+            {profile.stats.remixes > 5 && (
+              <div className="mt-1">
+                <span className="trending-indicator">creative</span>
+              </div>
+            )}
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-emerald-500">{profile.stats.karmaScore}</div>
-            <div className="text-sm text-secondary">karma</div>
+            <div className="text-3xl font-bold text-emerald-500 mb-1">{profile.stats.karmaScore}</div>
+            <div className="text-sm text-secondary font-medium">karma</div>
+            {profile.stats.karmaScore > 100 && (
+              <div className="mt-1">
+                <span className="new-indicator">respected</span>
+              </div>
+            )}
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-emerald-800">{profile.stats.remixedFromUser}</div>
-            <div className="text-sm text-secondary">times remixed</div>
+            <div className="text-3xl font-bold text-emerald-800 mb-1">{profile.stats.remixedFromUser}</div>
+            <div className="text-sm text-secondary font-medium">times remixed</div>
+            {profile.stats.remixedFromUser > 20 && (
+              <div className="mt-1">
+                <span className="popular-indicator">influential</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -663,169 +684,184 @@ const Profile: React.FC = () => {
               <p className="text-muted text-center py-8">No posts yet.</p>
             ) : (
               sortedPosts.map((post) => (
-                <div key={post.id} className="post-card p-6 hover-lift">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <ProfileAvatar user={profile} size="md" />
-                      <div>
-                        <div className="font-semibold text-primary">
-                          {profile?.username}
+                <Link key={post.id} to={`/post/${post.id}`} className="block">
+                  <div className="post-card p-6 hover-lift cursor-pointer">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <ProfileAvatar user={profile} size="md" />
+                        <div>
+                          <div className="font-semibold text-primary">
+                            {profile?.username}
+                          </div>
+                          <p className="text-sm text-muted">{formatDate(post.createdAt)}</p>
                         </div>
-                        <p className="text-sm text-muted">{formatDate(post.createdAt)}</p>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm">
+                        <div className="flex items-center space-x-1 text-gray-600">
+                          <span>💬</span>
+                          <span className="font-medium">{post._count.comments}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <button className="vote-button-up">
+                            <span>👍</span>
+                          </button>
+                          <span className="font-medium text-green-600">{post._count.votes}</span>
+                        </div>
+                        <div className="flex items-center space-x-1 text-purple-600">
+                          <span>🎵</span>
+                          <span className="font-medium">{post._count.originalRemixes}</span>
+                        </div>
+                        {post._count.originalRemixes > 10 && (
+                          <span className="trending-indicator">trending</span>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center space-x-4 text-sm text-muted">
-                      <span>💬 {post._count.comments}</span>
-                      <span>👍 {post._count.votes}</span>
-                      <span>🎵 {post._count.originalRemixes}</span>
-                    </div>
-                  </div>
 
-                  <div className="flex gap-4 mb-4">
-                    {/* Cover Art Thumbnail */}
-                    <div className="flex-shrink-0">
-                      <img
-                        src={post.coverArt ? `${API_CONFIG.SERVER_URL}/${post.coverArt}` : `${API_CONFIG.SERVER_URL}/uploads/covers/default.gif`}
-                        alt={`Cover art for ${post.title}`}
-                        className="w-16 h-16 object-cover rounded-lg border border-slate-600 shadow-md"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = `${API_CONFIG.SERVER_URL}/uploads/covers/default.gif`;
-                        }}
-                      />
-                    </div>
-                    
-                    {/* Post Content */}
-                    <div className="flex-1">
-                      <Link to={`/post/${post.id}`} className="block">
+                    <div className="flex gap-4 mb-4">
+                      {/* Cover Art Thumbnail */}
+                      <div className="flex-shrink-0">
+                        <img
+                          src={post.coverArt ? `${API_CONFIG.SERVER_URL}/${post.coverArt}` : `${API_CONFIG.SERVER_URL}/uploads/covers/default.gif`}
+                          alt={`Cover art for ${post.title}`}
+                          className="w-16 h-16 object-cover rounded-lg border border-slate-600 shadow-md"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = `${API_CONFIG.SERVER_URL}/uploads/covers/default.gif`;
+                          }}
+                        />
+                      </div>
+                      
+                      {/* Post Content */}
+                      <div className="flex-1">
                         <h3 className="text-xl font-semibold text-primary hover:text-accent mb-2 transition-colors">
                           {post.title}
                         </h3>
                         {post.description && (
                           <p className="text-secondary mb-3">{post.description}</p>
                         )}
-                      </Link>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Tags, BPM, and Key */}
-                  <div className="mb-4">
-                    {/* Regular Tags */}
-                    {post.postTags.filter(postTag => !postTag.tag.name.startsWith('bpm:') && !postTag.tag.name.startsWith('key:')).length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {post.postTags
-                          .filter(postTag => !postTag.tag.name.startsWith('bpm:') && !postTag.tag.name.startsWith('key:'))
-                          .map((postTag) => (
-                            <span 
-                              key={postTag.tag.id}
-                              className="tag"
-                            >
-                              #{postTag.tag.name}
-                            </span>
-                          ))}
-                      </div>
-                    )}
-                    
-                    {/* BPM and Key Info */}
-                    {(post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) || post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))) && (
-                      <div className="flex flex-wrap gap-2 text-sm">
-                        {post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) && (
-                          <div className="flex items-center space-x-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
-                            <span className="font-semibold">bpm:</span>
-                            <span>{post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:'))?.tag.name.replace('bpm:', '')}</span>
-                          </div>
-                        )}
-                        {post.postTags.find(postTag => postTag.tag.name.startsWith('key:')) && (
-                          <div className="flex items-center space-x-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
-                            <span className="font-semibold">key:</span>
-                            <span>{post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))?.tag.name.replace('key:', '')}</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      {post.postType === 'AUDIO_FILE' && post.filePath && (
-                        <>
-                          <button
-                            onClick={() => handlePlayAudio(post)}
-                            className="btn-primary hover-glow flex items-center space-x-2"
-                          >
-                            <span>Play</span>
-                          </button>
-                          <a
-                            href={API_ENDPOINTS.POST_DOWNLOAD(post.id)}
-                            className="flex items-center space-x-2 px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25"
-                          >
-                            <span>Download</span>
-                          </a>
-                          {user && (
-                            <>
-                              <button
-                                onClick={async () => {
-                                  try {
-                                    await addToQueueNext(post.id);
-                                  } catch (error) {
-                                    alert(error instanceof Error ? error.message : 'Failed to add to queue next');
-                                  }
-                                }}
-                                disabled={isInQueue(post.id)}
-                                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                                  isInQueue(post.id)
-                                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                    : 'bg-orange-600 hover:bg-orange-500 text-white hover:shadow-lg hover:shadow-orange-500/25'
-                                }`}
+                    {/* Tags, BPM, and Key */}
+                    <div className="mb-4">
+                      {/* Regular Tags */}
+                      {post.postTags.filter(postTag => !postTag.tag.name.startsWith('bpm:') && !postTag.tag.name.startsWith('key:')).length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {post.postTags
+                            .filter(postTag => !postTag.tag.name.startsWith('bpm:') && !postTag.tag.name.startsWith('key:'))
+                            .map((postTag) => (
+                              <span 
+                                key={postTag.tag.id}
+                                className="tag"
                               >
-                                <span>{isInQueue(post.id) ? 'In Queue' : 'Play Next'}</span>
-                              </button>
-                              <button
-                                onClick={async () => {
-                                  try {
-                                    await addToQueue(post.id);
-                                  } catch (error) {
-                                    alert(error instanceof Error ? error.message : 'Failed to add to queue');
-                                  }
-                                }}
-                                disabled={isInQueue(post.id)}
-                                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                                  isInQueue(post.id)
-                                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                    : 'bg-purple-600 hover:bg-purple-500 text-white hover:shadow-lg hover:shadow-purple-500/25'
-                                }`}
-                              >
-                                <span>{isInQueue(post.id) ? 'In Queue' : 'Add to Queue'}</span>
-                              </button>
-                            </>
+                                #{postTag.tag.name}
+                              </span>
+                            ))}
+                        </div>
+                      )}
+                      
+                      {/* BPM and Key Info */}
+                      {(post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) || post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))) && (
+                        <div className="flex flex-wrap gap-2 text-sm">
+                          {post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) && (
+                            <div className="flex items-center space-x-1 px-3 py-1 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 rounded-full border border-blue-300 shadow-sm">
+                              <span className="font-bold text-xs">BPM</span>
+                              <span className="font-mono font-bold">{post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:'))?.tag.name.replace('bpm:', '')}</span>
+                            </div>
                           )}
-                        </>
-                      )}
-                      {post.postType === 'YOUTUBE_LINK' && (
-                        <a
-                          href={post.youtubeUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-red-500/25"
-                        >
-                          <span>📺</span>
-                          <span>Watch on YouTube</span>
-                        </a>
+                          {post.postTags.find(postTag => postTag.tag.name.startsWith('key:')) && (
+                            <div className="flex items-center space-x-1 px-3 py-1 bg-gradient-to-r from-purple-50 to-purple-100 text-purple-800 rounded-full border border-purple-300 shadow-sm">
+                              <span className="font-bold text-xs">KEY</span>
+                              <span className="font-mono font-bold">{post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))?.tag.name.replace('key:', '')}</span>
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <span className="text-sm text-muted capitalize">
-                        {post.postType.replace('_', ' ').toLowerCase()}
-                      </span>
-                      <Link
-                        to={`/post/${post.id}`}
-                        className="flex items-center space-x-1 px-3 py-2 bg-slate-600 hover:bg-slate-500 text-white text-sm rounded-lg transition-all duration-200 hover:shadow-lg"
-                      >
-                        <span>See More</span>
-                      </Link>
+
+                    <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center space-x-3">
+                        {post.postType === 'AUDIO_FILE' && post.filePath && (
+                          <>
+                            <button
+                              onClick={() => handlePlayAudio(post)}
+                              className="btn-primary hover-glow flex items-center justify-center px-4 py-2 min-w-[80px]"
+                            >
+                              <span>Play</span>
+                            </button>
+                            <a
+                              href={API_ENDPOINTS.POST_DOWNLOAD(post.id)}
+                              className="flex items-center justify-center px-4 py-2 min-w-[80px] bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-all duration-200 hover:shadow-lg border border-emerald-500"
+                            >
+                              <span>Download</span>
+                            </a>
+                            {user && (
+                              <>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await addToQueueNext(post.id);
+                                    } catch (error) {
+                                      alert(error instanceof Error ? error.message : 'Failed to add to queue next');
+                                    }
+                                  }}
+                                  disabled={isInQueue(post.id)}
+                                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 border ${
+                                    isInQueue(post.id)
+                                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed border-gray-400'
+                                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:shadow-lg border-emerald-500'
+                                  }`}
+                                >
+                                  <span>{isInQueue(post.id) ? 'In Queue' : 'Play Next'}</span>
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await addToQueue(post.id);
+                                    } catch (error) {
+                                      alert(error instanceof Error ? error.message : 'Failed to add to queue');
+                                    }
+                                  }}
+                                  disabled={isInQueue(post.id)}
+                                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 border ${
+                                    isInQueue(post.id)
+                                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed border-gray-400'
+                                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:shadow-lg border-emerald-500'
+                                  }`}
+                                >
+                                  <span>{isInQueue(post.id) ? 'In Queue' : 'Add to Queue'}</span>
+                                </button>
+                              </>
+                            )}
+                          </>
+                        )}
+                        {post.postType === 'YOUTUBE_LINK' && (
+                          <a
+                            href={post.youtubeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-red-500/25"
+                          >
+                            <span>📺</span>
+                            <span>Watch on YouTube</span>
+                          </a>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-sm text-muted capitalize">
+                          {post.postType.replace('_', ' ').toLowerCase()}
+                        </span>
+                        <Link
+                          to={`/post/${post.id}`}
+                          className="flex items-center space-x-1 px-3 py-2 bg-slate-600 hover:bg-slate-500 text-white text-sm rounded-lg transition-all duration-200 hover:shadow-lg"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <span>See More</span>
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))
             )}
           </div>
@@ -1014,15 +1050,17 @@ const Profile: React.FC = () => {
                         {(post.postTags.find((postTag: any) => postTag.tag.name.startsWith('bpm:')) || post.postTags.find((postTag: any) => postTag.tag.name.startsWith('key:'))) && (
                           <div className="flex flex-wrap gap-2 text-sm">
                             {post.postTags.find((postTag: any) => postTag.tag.name.startsWith('bpm:')) && (
-                              <div className="flex items-center space-x-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
-                                <span className="font-semibold">bpm:</span>
-                                <span>{post.postTags.find((postTag: any) => postTag.tag.name.startsWith('bpm:'))?.tag.name.replace('bpm:', '')}</span>
+                              <div className="flex items-center space-x-1 px-3 py-1 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 rounded-full border border-blue-300 shadow-sm">
+                                <span className="text-xs">🎵</span>
+                                <span className="font-bold text-xs">BPM</span>
+                                <span className="font-mono font-bold">{post.postTags.find((postTag: any) => postTag.tag.name.startsWith('bpm:'))?.tag.name.replace('bpm:', '')}</span>
                               </div>
                             )}
                             {post.postTags.find((postTag: any) => postTag.tag.name.startsWith('key:')) && (
-                              <div className="flex items-center space-x-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
-                                <span className="font-semibold">key:</span>
-                                <span>{post.postTags.find((postTag: any) => postTag.tag.name.startsWith('key:'))?.tag.name.replace('key:', '')}</span>
+                              <div className="flex items-center space-x-1 px-3 py-1 bg-gradient-to-r from-purple-50 to-purple-100 text-purple-800 rounded-full border border-purple-300 shadow-sm">
+                                <span className="text-xs">🎹</span>
+                                <span className="font-bold text-xs">KEY</span>
+                                <span className="font-mono font-bold">{post.postTags.find((postTag: any) => postTag.tag.name.startsWith('key:'))?.tag.name.replace('key:', '')}</span>
                               </div>
                             )}
                           </div>
@@ -1036,14 +1074,14 @@ const Profile: React.FC = () => {
                           <>
                             <button
                               onClick={() => handlePlayAudio(post)}
-                              className="btn-primary hover-glow flex items-center space-x-2"
+                              className="btn-primary hover-glow flex items-center justify-center px-4 py-2 min-w-[80px]"
                             >
                               <span>▶️</span>
                               <span>Play</span>
                             </button>
                             <a
                               href={API_ENDPOINTS.POST_DOWNLOAD(post.id)}
-                              className="flex items-center space-x-2 px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25"
+                              className="flex items-center justify-center px-4 py-2 min-w-[80px] bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25"
                             >
                               <span>⬇️</span>
                               <span>Download</span>

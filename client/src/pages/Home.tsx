@@ -95,7 +95,8 @@ const Home: React.FC = () => {
         artist: post.user.username,
         url: audioUrl,
         postId: post.id,
-        userId: post.user.id
+        userId: post.user.id,
+        coverArt: post.coverArt
       });
     }
   };
@@ -126,8 +127,8 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-12">
+    <div className="grid-container navbar-spacing audio-player-spacing">
+      <div className="text-center grid-section">
         <h1 className="remix-logo text-6xl mb-4">wavshare</h1>
         <p className="text-xl text-secondary mb-8">
           a music collaboration platform for sharing and remixing audio content
@@ -151,8 +152,8 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-        <div className="card text-center hover-lift">
+      <div className="grid grid-cols-1 md:grid-cols-3 grid-gap-lg grid-section">
+        <div className="bg-gray-50 rounded-lg shadow-sm border border-gray-200 p-6 text-center hover-lift">
           <div className="text-4xl mb-4">🎵</div>
           <h3 className="text-xl font-semibold mb-2 text-primary">share your music</h3>
           <p className="text-secondary">
@@ -160,7 +161,7 @@ const Home: React.FC = () => {
           </p>
         </div>
         
-        <div className="card text-center hover-lift">
+        <div className="bg-gray-50 rounded-lg shadow-sm border border-gray-200 p-6 text-center hover-lift">
           <div className="text-4xl mb-4">🎧</div>
           <h3 className="text-xl font-semibold mb-2 text-primary">discover & listen</h3>
           <p className="text-secondary">
@@ -168,7 +169,7 @@ const Home: React.FC = () => {
           </p>
         </div>
         
-        <div className="card text-center hover-lift">
+        <div className="bg-gray-50 rounded-lg shadow-sm border border-gray-200 p-6 text-center hover-lift">
           <div className="text-4xl mb-4">🎛️</div>
           <h3 className="text-xl font-semibold mb-2 text-primary">remix & collaborate</h3>
           <p className="text-secondary">
@@ -199,9 +200,47 @@ const Home: React.FC = () => {
         </div>
         
         {loading && (
-          <div className="text-center py-8">
-            <div className="spinner h-12 w-12 mx-auto"></div>
-            <p className="text-secondary mt-4">loading posts...</p>
+          <div className="card-spacing">
+            {[...Array(3)].map((_, index) => (
+              <div key={index} className="skeleton-card">
+                <div className="skeleton-post">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="skeleton-avatar"></div>
+                      <div className="flex-1">
+                        <div className="skeleton-title w-32"></div>
+                        <div className="skeleton-text w-24"></div>
+                      </div>
+                    </div>
+                    <div className="flex space-x-4">
+                      <div className="skeleton-text w-12"></div>
+                      <div className="skeleton-text w-12"></div>
+                      <div className="skeleton-text w-12"></div>
+                    </div>
+                  </div>
+                  <div className="flex gap-4 mb-4">
+                    <div className="skeleton w-24 h-24 rounded-lg"></div>
+                    <div className="flex-1">
+                      <div className="skeleton-title w-3/4"></div>
+                      <div className="skeleton-text w-full"></div>
+                      <div className="skeleton-text w-2/3"></div>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2 mb-4">
+                    <div className="skeleton w-16 h-6 rounded-full"></div>
+                    <div className="skeleton w-20 h-6 rounded-full"></div>
+                    <div className="skeleton w-14 h-6 rounded-full"></div>
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="flex space-x-3">
+                      <div className="skeleton w-16 h-10 rounded-lg"></div>
+                      <div className="skeleton w-20 h-10 rounded-lg"></div>
+                    </div>
+                    <div className="skeleton w-20 h-10 rounded-lg"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -229,9 +268,12 @@ const Home: React.FC = () => {
         )}
 
         {!loading && !error && posts.length > 0 && (
-          <div className="space-y-6">
+          <div className="card-spacing">
             {posts.map((post) => (
-              <div key={post.id} className="post-card p-6 hover-lift">
+              <Link key={post.id} to={`/post/${post.id}`} className="block">
+                <div className={`post-card p-8 hover-lift cursor-pointer ${
+                  post.postType === 'AUDIO_FILE' ? 'post-type-audio' : 'post-type-youtube'
+                }`}>
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <ProfileAvatar user={post.user} size="lg" />
@@ -248,7 +290,7 @@ const Home: React.FC = () => {
                   <div className="flex items-center space-x-4 text-sm text-muted">
                     <span>💬 {post._count.comments}</span>
                     <span>👍 {post._count.votes}</span>
-                    <span>🎵 {post._count.originalRemixes}</span>
+                    <span>🎵 {post._count.originalRemixes} </span>
                   </div>
                 </div>
 
@@ -256,7 +298,7 @@ const Home: React.FC = () => {
                 {post.remixPosts && post.remixPosts.length > 0 && (
                   <div className="mb-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
                     <div className="flex items-center space-x-2 text-sm">
-                      <span className="text-emerald-600">🎵 remix of:</span>
+                      <span className="text-emerald-600">remix of:</span> 
                       <Link 
                         to={`/post/${post.remixPosts[0].originalPost.id}`}
                         className="text-emerald-700 hover:text-emerald-800 font-medium transition-colors"
@@ -283,14 +325,12 @@ const Home: React.FC = () => {
                   
                   {/* Post Content */}
                   <div className="flex-1">
-                    <Link to={`/post/${post.id}`} className="block">
-                      <h3 className="text-xl font-semibold text-primary hover:text-accent mb-2 transition-colors">
-                        {post.title}
-                      </h3>
-                      {post.description && (
-                        <p className="text-secondary mb-3">{post.description}</p>
-                      )}
-                    </Link>
+                    <h3 className="text-xl font-semibold text-primary hover:text-accent mb-2 transition-colors">
+                      {post.title}
+                    </h3>
+                    {post.description && (
+                      <p className="text-secondary mb-3">{post.description}</p>
+                    )}
                   </div>
                 </div>
 
@@ -316,41 +356,48 @@ const Home: React.FC = () => {
                   {(post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) || post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))) && (
                     <div className="flex flex-wrap gap-2 text-sm">
                       {post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) && (
-                        <div className="flex items-center space-x-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
-                          <span className="font-semibold">bpm:</span>
-                          <span>{post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:'))?.tag.name.replace('bpm:', '')}</span>
+                        <div className="flex items-center space-x-1 px-3 py-1 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 rounded-full border border-blue-300 shadow-sm">
+                          <span className="font-bold text-xs">BPM</span>
+                          <span className="font-mono font-bold">{post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:'))?.tag.name.replace('bpm:', '')}</span>
                         </div>
                       )}
                       {post.postTags.find(postTag => postTag.tag.name.startsWith('key:')) && (
-                        <div className="flex items-center space-x-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
-                          <span className="font-semibold">key:</span>
-                          <span>{post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))?.tag.name.replace('key:', '')}</span>
+                        <div className="flex items-center space-x-1 px-3 py-1 bg-gradient-to-r from-purple-50 to-purple-100 text-purple-800 rounded-full border border-purple-300 shadow-sm">
+                          <span className="font-bold text-xs">KEY</span>
+                          <span className="font-mono font-bold">{post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))?.tag.name.replace('key:', '')}</span>
                         </div>
                       )}
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center space-x-3">
                     {post.postType === 'AUDIO_FILE' && post.filePath && (
                       <>
                         <button
-                          onClick={() => handlePlayAudio(post)}
-                          className="btn-primary hover-glow flex items-center space-x-2"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handlePlayAudio(post);
+                          }}
+                          className="btn-primary hover-glow flex items-center justify-center px-4 py-2 min-w-[80px]"
                         >
                           <span>play</span>
                         </button>
                         <a
                           href={API_ENDPOINTS.POST_DOWNLOAD(post.id)}
-                          className="flex items-center space-x-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/25"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center justify-center px-4 py-2 min-w-[80px] bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-all duration-200 hover:shadow-lg border border-emerald-500"
                         >
                           <span>download</span>
                         </a>
                         {user && (
                           <>
                             <button
-                              onClick={async () => {
+                              onClick={async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 try {
                                   await addToQueueNext(post.id);
                                 } catch (error) {
@@ -358,16 +405,18 @@ const Home: React.FC = () => {
                                 }
                               }}
                               disabled={isInQueue(post.id)}
-                              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 border ${
                                 isInQueue(post.id)
-                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                  : 'bg-emerald-600 hover:bg-emerald-500 text-white hover:shadow-lg hover:shadow-emerald-500/25'
+                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed border-gray-400'
+                                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:shadow-lg border-emerald-500'
                               }`}
                             >
                               <span>{isInQueue(post.id) ? 'in queue' : 'play next'}</span>
                             </button>
                             <button
-                              onClick={async () => {
+                              onClick={async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 try {
                                   await addToQueue(post.id);
                                 } catch (error) {
@@ -375,10 +424,10 @@ const Home: React.FC = () => {
                                 }
                               }}
                               disabled={isInQueue(post.id)}
-                              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 border ${
                                 isInQueue(post.id)
-                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                  : 'bg-emerald-700 hover:bg-emerald-600 text-white hover:shadow-lg hover:shadow-emerald-600/25'
+                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed border-gray-400'
+                                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:shadow-lg border-emerald-500'
                               }`}
                             >
                               <span>{isInQueue(post.id) ? 'in queue' : 'add to queue'}</span>
@@ -392,6 +441,7 @@ const Home: React.FC = () => {
                         href={post.youtubeUrl}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
                         className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-red-500/25"
                       >
                         <span>📺</span>
@@ -403,15 +453,10 @@ const Home: React.FC = () => {
                     <span className="text-sm text-muted capitalize">
                       {post.postType.replace('_', ' ').toLowerCase()}
                     </span>
-                    <Link
-                      to={`/post/${post.id}`}
-                      className="flex items-center space-x-1 px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm rounded-lg transition-all duration-200 hover:shadow-lg"
-                    >
-                      <span>see more</span>
-                    </Link>
                   </div>
                 </div>
-              </div>
+                </div>
+              </Link>
             ))}
           </div>
         )}

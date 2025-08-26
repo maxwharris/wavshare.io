@@ -8,6 +8,7 @@ interface AudioTrack {
   duration?: number;
   postId: string;
   userId: string;
+  coverArt?: string;
 }
 
 interface AudioContextType {
