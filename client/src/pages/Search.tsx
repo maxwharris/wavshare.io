@@ -188,7 +188,7 @@ const Search: React.FC = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search for songs, users, or tags..."
-            className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-primary placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
           />
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400">
             🔍
@@ -210,7 +210,7 @@ const Search: React.FC = () => {
                   placeholder="Min"
                   min="60"
                   max="200"
-                  className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded text-primary placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
                 <span className="text-secondary self-center">-</span>
                 <input
@@ -220,7 +220,7 @@ const Search: React.FC = () => {
                   placeholder="Max"
                   min="60"
                   max="200"
-                  className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded text-primary placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>
@@ -231,7 +231,7 @@ const Search: React.FC = () => {
               <select
                 value={selectedKey}
                 onChange={(e) => setSelectedKey(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-primary focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
                 <option value="">Any Key</option>
                 <option value="C">C Major</option>
@@ -322,7 +322,7 @@ const Search: React.FC = () => {
               onClick={() => setActiveTab('posts')}
               className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
                 activeTab === 'posts'
-                  ? 'border-blue-500 text-accent'
+                  ? 'border-emerald-500 text-accent'
                   : 'border-transparent text-secondary hover:text-primary'
               }`}
             >
@@ -332,7 +332,7 @@ const Search: React.FC = () => {
               onClick={() => setActiveTab('users')}
               className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
                 activeTab === 'users'
-                  ? 'border-blue-500 text-accent'
+                  ? 'border-emerald-500 text-accent'
                   : 'border-transparent text-secondary hover:text-primary'
               }`}
             >
@@ -342,7 +342,7 @@ const Search: React.FC = () => {
               onClick={() => setActiveTab('playlists')}
               className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
                 activeTab === 'playlists'
-                  ? 'border-blue-500 text-accent'
+                  ? 'border-emerald-500 text-accent'
                   : 'border-transparent text-secondary hover:text-primary'
               }`}
             >
@@ -409,14 +409,14 @@ const Search: React.FC = () => {
                       {(post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) || post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))) && (
                         <div className="flex flex-wrap gap-2 text-sm">
                           {post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) && (
-                            <div className="flex items-center space-x-1 px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full border border-blue-500/30">
-                              <span className="font-semibold">BPM:</span>
+                            <div className="flex items-center space-x-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
+                              <span className="font-semibold">bpm:</span>
                               <span>{post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:'))?.tag.name.replace('bpm:', '')}</span>
                             </div>
                           )}
                           {post.postTags.find(postTag => postTag.tag.name.startsWith('key:')) && (
-                            <div className="flex items-center space-x-1 px-3 py-1 bg-purple-600/20 text-purple-300 rounded-full border border-purple-500/30">
-                              <span className="font-semibold">Key:</span>
+                            <div className="flex items-center space-x-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
+                              <span className="font-semibold">key:</span>
                               <span>{post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))?.tag.name.replace('key:', '')}</span>
                             </div>
                           )}

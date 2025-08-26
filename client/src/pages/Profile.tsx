@@ -452,7 +452,7 @@ const Profile: React.FC = () => {
                   className="w-20 h-20 rounded-full object-cover border-2 border-slate-600"
                 />
               ) : (
-                <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-2xl border-2 border-slate-600">
+                  <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-2xl border-2 border-emerald-300">
                   {profile.username.charAt(0).toUpperCase()}
                 </div>
               )}
@@ -467,7 +467,7 @@ const Profile: React.FC = () => {
                       disabled={uploadingPhoto}
                     />
                     <button
-                      className="w-8 h-8 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center text-white text-sm transition-colors disabled:opacity-50"
+                      className="w-8 h-8 bg-emerald-600 hover:bg-emerald-700 rounded-full flex items-center justify-center text-white text-sm transition-colors disabled:opacity-50"
                       disabled={uploadingPhoto}
                       title="Upload profile photo"
                     >
@@ -558,78 +558,78 @@ const Profile: React.FC = () => {
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-slate-700/30 rounded-lg border border-slate-600">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-400">{profile.stats.posts}</div>
-            <div className="text-sm text-secondary">Posts</div>
+            <div className="text-2xl font-bold text-emerald-600">{profile.stats.posts}</div>
+            <div className="text-sm text-secondary">posts</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-purple-400">{profile.stats.remixes}</div>
-            <div className="text-sm text-secondary">Remixes</div>
+            <div className="text-2xl font-bold text-emerald-700">{profile.stats.remixes}</div>
+            <div className="text-sm text-secondary">remixes</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-400">{profile.stats.karmaScore}</div>
-            <div className="text-sm text-secondary">Karma</div>
+            <div className="text-2xl font-bold text-emerald-500">{profile.stats.karmaScore}</div>
+            <div className="text-sm text-secondary">karma</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-orange-400">{profile.stats.remixedFromUser}</div>
-            <div className="text-sm text-secondary">Times Remixed</div>
+            <div className="text-2xl font-bold text-emerald-800">{profile.stats.remixedFromUser}</div>
+            <div className="text-sm text-secondary">times remixed</div>
           </div>
         </div>
       </div>
 
       {/* Content Tabs */}
       <div className="card">
-        <div className="flex border-b border-slate-600 mb-6">
+        <div className="flex border-b border-gray-200 mb-6">
           <button
             onClick={() => setActiveTab('posts')}
             className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
               activeTab === 'posts'
-                ? 'border-blue-500 text-accent'
+                ? 'border-emerald-500 text-accent'
                 : 'border-transparent text-secondary hover:text-primary'
             }`}
           >
-            Posts ({profile.stats.posts})
+            posts ({profile.stats.posts})
           </button>
           <button
             onClick={() => setActiveTab('remixes')}
             className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
               activeTab === 'remixes'
-                ? 'border-blue-500 text-accent'
+                ? 'border-emerald-500 text-accent'
                 : 'border-transparent text-secondary hover:text-primary'
             }`}
           >
-            Remixes ({profile.stats.remixes})
+            remixes ({profile.stats.remixes})
           </button>
           <button
             onClick={() => setActiveTab('comments')}
             className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
               activeTab === 'comments'
-                ? 'border-blue-500 text-accent'
+                ? 'border-emerald-500 text-accent'
                 : 'border-transparent text-secondary hover:text-primary'
             }`}
           >
-            Recent Comments ({profile.comments.length})
+            recent comments ({profile.comments.length})
           </button>
           <button
             onClick={() => setActiveTab('upvoted')}
             className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
               activeTab === 'upvoted'
-                ? 'border-blue-500 text-accent'
+                ? 'border-emerald-500 text-accent'
                 : 'border-transparent text-secondary hover:text-primary'
             }`}
           >
-            Upvoted ({upvotedPosts.length})
+            upvoted ({upvotedPosts.length})
           </button>
           <button
             onClick={() => setActiveTab('playlists')}
             className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
               activeTab === 'playlists'
-                ? 'border-blue-500 text-accent'
+                ? 'border-emerald-500 text-accent'
                 : 'border-transparent text-secondary hover:text-primary'
             }`}
           >
-            Playlists
+            playlists
           </button>
         </div>
 
@@ -646,7 +646,7 @@ const Profile: React.FC = () => {
                   <select
                     value={sortBy}
                     onChange={(e) => handleSortChange(e.target.value)}
-                    className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-primary focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   >
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
@@ -730,14 +730,14 @@ const Profile: React.FC = () => {
                     {(post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) || post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))) && (
                       <div className="flex flex-wrap gap-2 text-sm">
                         {post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) && (
-                          <div className="flex items-center space-x-1 px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full border border-blue-500/30">
-                            <span className="font-semibold">BPM:</span>
+                          <div className="flex items-center space-x-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
+                            <span className="font-semibold">bpm:</span>
                             <span>{post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:'))?.tag.name.replace('bpm:', '')}</span>
                           </div>
                         )}
                         {post.postTags.find(postTag => postTag.tag.name.startsWith('key:')) && (
-                          <div className="flex items-center space-x-1 px-3 py-1 bg-purple-600/20 text-purple-300 rounded-full border border-purple-500/30">
-                            <span className="font-semibold">Key:</span>
+                          <div className="flex items-center space-x-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
+                            <span className="font-semibold">key:</span>
                             <span>{post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))?.tag.name.replace('key:', '')}</span>
                           </div>
                         )}
@@ -855,14 +855,14 @@ const Profile: React.FC = () => {
                     Remix of{' '}
                     <Link 
                       to={`/post/${remix.originalPost.id}`}
-                      className="text-accent hover:text-blue-300 transition-colors"
+                      className="text-accent hover:text-emerald-300 transition-colors"
                     >
                       "{remix.originalPost.title}"
                     </Link>
                     {' '}by{' '}
                     <Link 
                       to={`/profile/${remix.originalPost.user.id}`}
-                      className="text-accent hover:text-blue-300 transition-colors"
+                      className="text-accent hover:text-emerald-300 transition-colors"
                     >
                       {remix.originalPost.user.username}
                     </Link>
@@ -905,14 +905,14 @@ const Profile: React.FC = () => {
                     Comment on{' '}
                     <Link 
                       to={`/post/${comment.post.id}`}
-                      className="text-accent hover:text-blue-300 transition-colors"
+                      className="text-accent hover:text-emerald-300 transition-colors"
                     >
                       "{comment.post.title}"
                     </Link>
                     {' '}by{' '}
                     <Link 
                       to={`/profile/${comment.post.user.id}`}
-                      className="text-accent hover:text-blue-300 transition-colors"
+                      className="text-accent hover:text-emerald-300 transition-colors"
                     >
                       {comment.post.user.username}
                     </Link>
@@ -1014,14 +1014,14 @@ const Profile: React.FC = () => {
                         {(post.postTags.find((postTag: any) => postTag.tag.name.startsWith('bpm:')) || post.postTags.find((postTag: any) => postTag.tag.name.startsWith('key:'))) && (
                           <div className="flex flex-wrap gap-2 text-sm">
                             {post.postTags.find((postTag: any) => postTag.tag.name.startsWith('bpm:')) && (
-                              <div className="flex items-center space-x-1 px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full border border-blue-500/30">
-                                <span className="font-semibold">BPM:</span>
+                              <div className="flex items-center space-x-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
+                                <span className="font-semibold">bpm:</span>
                                 <span>{post.postTags.find((postTag: any) => postTag.tag.name.startsWith('bpm:'))?.tag.name.replace('bpm:', '')}</span>
                               </div>
                             )}
                             {post.postTags.find((postTag: any) => postTag.tag.name.startsWith('key:')) && (
-                              <div className="flex items-center space-x-1 px-3 py-1 bg-purple-600/20 text-purple-300 rounded-full border border-purple-500/30">
-                                <span className="font-semibold">Key:</span>
+                              <div className="flex items-center space-x-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
+                                <span className="font-semibold">key:</span>
                                 <span>{post.postTags.find((postTag: any) => postTag.tag.name.startsWith('key:'))?.tag.name.replace('key:', '')}</span>
                               </div>
                             )}

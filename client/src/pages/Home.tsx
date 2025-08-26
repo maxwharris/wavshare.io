@@ -130,23 +130,23 @@ const Home: React.FC = () => {
       <div className="text-center mb-12">
         <h1 className="remix-logo text-6xl mb-4">wavshare</h1>
         <p className="text-xl text-secondary mb-8">
-          A music collaboration platform for sharing and remixing audio content
+          a music collaboration platform for sharing and remixing audio content
         </p>
         <div className="flex justify-center space-x-4">
           {user ? (
             <Link to="/create" className="btn-primary">
-              Create Post
+              create post
             </Link>
           ) : (
             <Link to="/register" className="btn-primary">
-              Get Started
+              get started
             </Link>
           )}
           <button 
             className="btn-secondary"
             onClick={() => document.getElementById('posts-section')?.scrollIntoView({ behavior: 'smooth' })}
           >
-            Browse Posts
+            browse posts
           </button>
         </div>
       </div>
@@ -154,46 +154,46 @@ const Home: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
         <div className="card text-center hover-lift">
           <div className="text-4xl mb-4">🎵</div>
-          <h3 className="text-xl font-semibold mb-2 text-primary">Share Your Music</h3>
+          <h3 className="text-xl font-semibold mb-2 text-primary">share your music</h3>
           <p className="text-secondary">
-            Upload your original samples or share YouTube links with the community
+            upload your original samples or share youtube links with the community
           </p>
         </div>
         
         <div className="card text-center hover-lift">
           <div className="text-4xl mb-4">🎧</div>
-          <h3 className="text-xl font-semibold mb-2 text-primary">Discover & Listen</h3>
+          <h3 className="text-xl font-semibold mb-2 text-primary">discover & listen</h3>
           <p className="text-secondary">
-            Browse through amazing tracks with seamless audio playback
+            browse through amazing tracks with seamless audio playback
           </p>
         </div>
         
         <div className="card text-center hover-lift">
           <div className="text-4xl mb-4">🎛️</div>
-          <h3 className="text-xl font-semibold mb-2 text-primary">Remix & Collaborate</h3>
+          <h3 className="text-xl font-semibold mb-2 text-primary">remix & collaborate</h3>
           <p className="text-secondary">
-            Download tracks, create remixes, and build on others' work
+            download tracks, create remixes, and build on others' work
           </p>
         </div>
       </div>
 
       <div id="posts-section" className="card">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-primary">Recent Posts</h2>
+          <h2 className="text-2xl font-bold text-primary">recent posts</h2>
           <div className="flex items-center space-x-2">
-            <label className="text-sm text-secondary">Sort by:</label>
+            <label className="text-sm text-secondary">sort by:</label>
             <select
               value={sortBy}
               onChange={(e) => handleSortChange(e.target.value)}
-              className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-primary focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="form-select"
             >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="most_voted">Most Voted</option>
-              <option value="most_commented">Most Commented</option>
-              <option value="most_remixed">Most Remixed</option>
-              <option value="title_asc">Title A-Z</option>
-              <option value="title_desc">Title Z-A</option>
+              <option value="newest">newest first</option>
+              <option value="oldest">oldest first</option>
+              <option value="most_voted">most voted</option>
+              <option value="most_commented">most commented</option>
+              <option value="most_remixed">most remixed</option>
+              <option value="title_asc">title a-z</option>
+              <option value="title_desc">title z-a</option>
             </select>
           </div>
         </div>
@@ -201,28 +201,28 @@ const Home: React.FC = () => {
         {loading && (
           <div className="text-center py-8">
             <div className="spinner h-12 w-12 mx-auto"></div>
-            <p className="text-secondary mt-4">Loading posts...</p>
+            <p className="text-secondary mt-4">loading posts...</p>
           </div>
         )}
 
         {error && (
           <div className="text-center py-8">
-            <p className="text-red-400">{error}</p>
+            <p className="text-red-500">{error}</p>
             <button 
               onClick={fetchPosts}
               className="btn-secondary mt-4"
             >
-              Try Again
+              try again
             </button>
           </div>
         )}
 
         {!loading && !error && posts.length === 0 && (
           <div className="text-center text-muted py-8">
-            <p>No posts yet. Be the first to share your music!</p>
+            <p>no posts yet. be the first to share your music!</p>
             {user && (
               <Link to="/create" className="btn-primary mt-4 inline-block hover-glow">
-                Create First Post
+                create first post
               </Link>
             )}
           </div>
@@ -254,12 +254,12 @@ const Home: React.FC = () => {
 
                 {/* Show remix information if this is a remix */}
                 {post.remixPosts && post.remixPosts.length > 0 && (
-                  <div className="mb-3 p-3 bg-purple-600/10 border border-purple-500/30 rounded-lg">
+                  <div className="mb-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
                     <div className="flex items-center space-x-2 text-sm">
-                      <span className="text-purple-400">🎵 Remix of:</span>
+                      <span className="text-emerald-600">🎵 remix of:</span>
                       <Link 
                         to={`/post/${post.remixPosts[0].originalPost.id}`}
-                        className="text-purple-300 hover:text-purple-200 font-medium transition-colors"
+                        className="text-emerald-700 hover:text-emerald-800 font-medium transition-colors"
                       >
                         "{post.remixPosts[0].originalPost.title}" by {post.remixPosts[0].originalPost.user.username}
                       </Link>
@@ -273,7 +273,7 @@ const Home: React.FC = () => {
                     <img
                       src={post.coverArt ? buildServerUrl(post.coverArt) : buildServerUrl('uploads/covers/default.gif')}
                       alt={`Cover art for ${post.title}`}
-                      className="w-24 h-24 object-cover rounded-lg border border-slate-600"
+                      className="w-24 h-24 object-cover rounded-lg border border-gray-300"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = buildServerUrl('uploads/covers/default.gif');
@@ -316,14 +316,14 @@ const Home: React.FC = () => {
                   {(post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) || post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))) && (
                     <div className="flex flex-wrap gap-2 text-sm">
                       {post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:')) && (
-                        <div className="flex items-center space-x-1 px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full border border-blue-500/30">
-                          <span className="font-semibold">BPM:</span>
+                        <div className="flex items-center space-x-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
+                          <span className="font-semibold">bpm:</span>
                           <span>{post.postTags.find(postTag => postTag.tag.name.startsWith('bpm:'))?.tag.name.replace('bpm:', '')}</span>
                         </div>
                       )}
                       {post.postTags.find(postTag => postTag.tag.name.startsWith('key:')) && (
-                        <div className="flex items-center space-x-1 px-3 py-1 bg-purple-600/20 text-purple-300 rounded-full border border-purple-500/30">
-                          <span className="font-semibold">Key:</span>
+                        <div className="flex items-center space-x-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
+                          <span className="font-semibold">key:</span>
                           <span>{post.postTags.find(postTag => postTag.tag.name.startsWith('key:'))?.tag.name.replace('key:', '')}</span>
                         </div>
                       )}
@@ -339,13 +339,13 @@ const Home: React.FC = () => {
                           onClick={() => handlePlayAudio(post)}
                           className="btn-primary hover-glow flex items-center space-x-2"
                         >
-                          <span>Play</span>
+                          <span>play</span>
                         </button>
                         <a
                           href={API_ENDPOINTS.POST_DOWNLOAD(post.id)}
-                          className="flex items-center space-x-2 px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25"
+                          className="flex items-center space-x-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/25"
                         >
-                          <span>Download</span>
+                          <span>download</span>
                         </a>
                         {user && (
                           <>
@@ -360,11 +360,11 @@ const Home: React.FC = () => {
                               disabled={isInQueue(post.id)}
                               className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
                                 isInQueue(post.id)
-                                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                  : 'bg-orange-600 hover:bg-orange-500 text-white hover:shadow-lg hover:shadow-orange-500/25'
+                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  : 'bg-emerald-600 hover:bg-emerald-500 text-white hover:shadow-lg hover:shadow-emerald-500/25'
                               }`}
                             >
-                              <span>{isInQueue(post.id) ? 'In Queue' : 'Play Next'}</span>
+                              <span>{isInQueue(post.id) ? 'in queue' : 'play next'}</span>
                             </button>
                             <button
                               onClick={async () => {
@@ -377,11 +377,11 @@ const Home: React.FC = () => {
                               disabled={isInQueue(post.id)}
                               className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
                                 isInQueue(post.id)
-                                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                  : 'bg-purple-600 hover:bg-purple-500 text-white hover:shadow-lg hover:shadow-purple-500/25'
+                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  : 'bg-emerald-700 hover:bg-emerald-600 text-white hover:shadow-lg hover:shadow-emerald-600/25'
                               }`}
                             >
-                              <span>{isInQueue(post.id) ? 'In Queue' : 'Add to Queue'}</span>
+                              <span>{isInQueue(post.id) ? 'in queue' : 'add to queue'}</span>
                             </button>
                           </>
                         )}
@@ -395,7 +395,7 @@ const Home: React.FC = () => {
                         className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-red-500/25"
                       >
                         <span>📺</span>
-                        <span>Watch on YouTube</span>
+                        <span>watch on youtube</span>
                       </a>
                     )}
                   </div>
@@ -405,9 +405,9 @@ const Home: React.FC = () => {
                     </span>
                     <Link
                       to={`/post/${post.id}`}
-                      className="flex items-center space-x-1 px-3 py-2 bg-slate-600 hover:bg-slate-500 text-white text-sm rounded-lg transition-all duration-200 hover:shadow-lg"
+                      className="flex items-center space-x-1 px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm rounded-lg transition-all duration-200 hover:shadow-lg"
                     >
-                      <span>See More</span>
+                      <span>see more</span>
                     </Link>
                   </div>
                 </div>
@@ -420,37 +420,37 @@ const Home: React.FC = () => {
       {/* Playlist Modal */}
       {showPlaylistModal && selectedPost && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-lg p-6 w-full max-w-md max-h-96 overflow-y-auto">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-96 overflow-y-auto shadow-xl border border-gray-200">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-white">Add to Playlist</h2>
+              <h2 className="text-xl font-bold text-gray-800">add to playlist</h2>
               <button
                 onClick={() => {
                   setShowPlaylistModal(false);
                   setSelectedPost(null);
                 }}
-                className="text-gray-400 hover:text-white text-2xl"
+                className="text-gray-400 hover:text-gray-600 text-2xl"
               >
                 ×
               </button>
             </div>
             
-            <div className="mb-4 p-3 bg-slate-700 rounded-lg">
-              <h3 className="font-medium text-white truncate">{selectedPost.title}</h3>
-              <p className="text-sm text-gray-400">by {selectedPost.user.username}</p>
+            <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <h3 className="font-medium text-gray-800 truncate">{selectedPost.title}</h3>
+              <p className="text-sm text-gray-600">by {selectedPost.user.username}</p>
             </div>
 
             {playlists.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-400 mb-4">You don't have any playlists yet.</p>
+                <p className="text-gray-600 mb-4">you don't have any playlists yet.</p>
                 <Link
                   to="/playlists"
-                  className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                   onClick={() => {
                     setShowPlaylistModal(false);
                     setSelectedPost(null);
                   }}
                 >
-                  Create Your First Playlist
+                  create your first playlist
                 </Link>
               </div>
             ) : (
@@ -460,11 +460,11 @@ const Home: React.FC = () => {
                   return (
                     <div
                       key={playlist.id}
-                      className="flex items-center justify-between p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                      className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
                     >
                       <div className="flex-1">
-                        <h4 className="font-medium text-white truncate">{playlist.name}</h4>
-                        <p className="text-sm text-gray-400">
+                        <h4 className="font-medium text-gray-800 truncate">{playlist.name}</h4>
+                        <p className="text-sm text-gray-600">
                           {playlist.tracks?.length || 0} track{(playlist.tracks?.length || 0) !== 1 ? 's' : ''}
                         </p>
                       </div>
@@ -472,11 +472,11 @@ const Home: React.FC = () => {
                         onClick={() => handlePlaylistToggle(playlist.id, selectedPost.id)}
                         className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                           isInPlaylist
-                            ? 'bg-red-600 hover:bg-red-700 text-white'
-                            : 'bg-green-600 hover:bg-green-700 text-white'
+                            ? 'bg-red-500 hover:bg-red-600 text-white'
+                            : 'bg-emerald-500 hover:bg-emerald-600 text-white'
                         }`}
                       >
-                        {isInPlaylist ? 'Remove' : 'Add'}
+                        {isInPlaylist ? 'remove' : 'add'}
                       </button>
                     </div>
                   );
@@ -490,9 +490,9 @@ const Home: React.FC = () => {
                   setShowPlaylistModal(false);
                   setSelectedPost(null);
                 }}
-                className="bg-slate-600 hover:bg-slate-500 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors"
               >
-                Done
+                done
               </button>
             </div>
           </div>

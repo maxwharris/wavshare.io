@@ -23,10 +23,10 @@ import './App.css';
 
 // Loading component for authentication initialization
 const LoadingScreen: React.FC = () => (
-  <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+  <div className="min-h-screen bg-white flex items-center justify-center">
     <div className="text-center">
       <div className="spinner h-12 w-12 mx-auto mb-4"></div>
-      <p className="text-secondary">Loading...</p>
+      <p className="text-secondary">loading...</p>
     </div>
   </div>
 );
@@ -46,7 +46,7 @@ const AppContent: React.FC = () => {
           <QueueProvider>
             <NotificationProvider>
               <Router>
-                <div className="App min-h-screen bg-slate-900">
+                <div className="App min-h-screen bg-white">
                   <Navbar />
                   <main className="container mx-auto px-4 py-8">
                     <Routes>
