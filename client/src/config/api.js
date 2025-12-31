@@ -1,7 +1,7 @@
 // API Configuration - Using Create React App's built-in environment variable support
 export const API_CONFIG = {
-  BASE_URL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api',
-  SERVER_URL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
+  BASE_URL: process.env.REACT_APP_API_BASE_URL || '/api',
+  SERVER_URL: process.env.REACT_APP_API_URL || '',
   ENVIRONMENT: process.env.REACT_APP_ENVIRONMENT || 'development'
 };
 
