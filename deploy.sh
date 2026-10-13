@@ -30,5 +30,6 @@ npx prisma generate
 npx tsc --outDir dist.next
 rm -rf dist.prev && { [ ! -d dist ] || mv dist dist.prev; } && mv dist.next dist && rm -rf dist.prev
 cd ..
-pm2 restart wavshare-api
+# Not in pm2 (first deploy, or after `deployp down`): start it the way it was originally started.
+pm2 restart wavshare-api 2>/dev/null || pm2 start ecosystem.config.js --only wavshare-api --env production
 pm2 save
